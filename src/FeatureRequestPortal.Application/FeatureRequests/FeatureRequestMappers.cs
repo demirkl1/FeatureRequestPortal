@@ -1,12 +1,14 @@
 using Riok.Mapperly.Abstractions;
+using Volo.Abp.Mapperly;
 
 namespace FeatureRequestPortal.FeatureRequests;
 
-/* This template uses Mapperly (not AutoMapper) as the object mapper. Each mapper below
- * is picked up by AddMapperlyObjectMapper and used through IObjectMapper. */
+/* This template uses Mapperly (not AutoMapper) as the object mapper. One-way mappers
+ * derive from MapperBase, which is how AddMapperlyObjectMapper discovers them and
+ * makes them available through IObjectMapper. */
 
 [Mapper]
-public partial class FeatureRequestToFeatureRequestDtoMapper : MapperlyMapperBase<FeatureRequest, FeatureRequestDto>
+public partial class FeatureRequestToFeatureRequestDtoMapper : MapperBase<FeatureRequest, FeatureRequestDto>
 {
     public override partial FeatureRequestDto Map(FeatureRequest source);
 
@@ -14,7 +16,7 @@ public partial class FeatureRequestToFeatureRequestDtoMapper : MapperlyMapperBas
 }
 
 [Mapper]
-public partial class FeatureRequestToFeatureRequestDetailDtoMapper : MapperlyMapperBase<FeatureRequest, FeatureRequestDetailDto>
+public partial class FeatureRequestToFeatureRequestDetailDtoMapper : MapperBase<FeatureRequest, FeatureRequestDetailDto>
 {
     /* HasCurrentUserVoted is filled in by the application service from the current user's votes. */
     [MapperIgnoreTarget(nameof(FeatureRequestDetailDto.HasCurrentUserVoted))]
@@ -25,7 +27,7 @@ public partial class FeatureRequestToFeatureRequestDetailDtoMapper : MapperlyMap
 }
 
 [Mapper]
-public partial class CommentToCommentDtoMapper : MapperlyMapperBase<Comment, CommentDto>
+public partial class CommentToCommentDtoMapper : MapperBase<Comment, CommentDto>
 {
     /* CreatorName is resolved from the identity module by the application service. */
     [MapperIgnoreTarget(nameof(CommentDto.CreatorName))]

@@ -1,0 +1,10 @@
+using FeatureRequestPortal.FeatureRequests;
+using Xunit;
+
+namespace FeatureRequestPortal.EntityFrameworkCore.Applications;
+
+[Collection(FeatureRequestPortalTestConsts.CollectionDefinitionName)]
+public class EfCoreFeatureRequestAppServiceTests : FeatureRequestAppServiceTests<FeatureRequestPortalEntityFrameworkCoreTestModule>
+{
+
+}
