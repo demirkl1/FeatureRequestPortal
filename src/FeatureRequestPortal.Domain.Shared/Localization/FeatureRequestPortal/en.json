@@ -1,9 +1,61 @@
 {
   "culture": "en",
   "texts": {
-    "AppName": "FeatureRequestPortal",
+    "AppName": "Feature Request Portal",
     "Menu:Home": "Home",
     "Welcome": "Welcome",
-    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io."
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+
+    "Menu:FeatureRequests": "Feature Requests",
+    "Menu:NewFeatureRequest": "New Request",
+
+    "FeatureRequests": "Feature Requests",
+    "FeatureRequestsDescription": "Tell us which features you want to see next and vote for the ideas of others.",
+    "NewFeatureRequest": "New Feature Request",
+    "CreateFeatureRequest": "Create",
+    "BackToList": "Back to list",
+
+    "Title": "Title",
+    "Description": "Description",
+    "Status": "Status",
+    "VoteCount": "Votes",
+    "CreationTime": "Created",
+    "Actions": "Actions",
+    "AllStatuses": "All statuses",
+    "FilterByStatus": "Filter by status",
+
+    "Vote": "Vote",
+    "Voted": "Voted",
+    "VoteSuccess": "Thanks for your vote!",
+    "LoginToVote": "Log in to vote",
+    "LoginToComment": "Log in to write a comment",
+
+    "Comments": "Comments",
+    "NoComments": "No comments yet. Be the first one!",
+    "YourComment": "Your comment",
+    "AddComment": "Add comment",
+    "CommentAdded": "Your comment has been added.",
+    "CommentMinLengthHint": "Comments must be at least {0} characters long.",
+    "Anonymous": "Unknown user",
+
+    "ChangeStatus": "Change status",
+    "StatusUpdated": "Status updated.",
+    "DeleteFeatureRequest": "Delete",
+    "FeatureRequestDeletedMessage": "The feature request has been deleted.",
+    "AreYouSureToDelete": "Are you sure you want to delete '{0}'?",
+
+    "Permission:FeatureRequests": "Feature requests",
+    "Permission:FeatureRequests.Create": "Create",
+    "Permission:FeatureRequests.Delete": "Delete",
+    "Permission:FeatureRequests.ChangeStatus": "Change status",
+
+    "Enum:FeatureRequestStatus.0": "Pending",
+    "Enum:FeatureRequestStatus.1": "Approved",
+    "Enum:FeatureRequestStatus.2": "Rejected",
+    "Enum:FeatureRequestStatus.3": "Planned",
+    "Enum:FeatureRequestStatus.4": "Completed",
+    "Enum:FeatureRequestStatus.5": "Cancelled",
+
+    "FeatureRequestPortal:AlreadyVoted": "You have already voted for this feature request."
   }
 }

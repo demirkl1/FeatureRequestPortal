@@ -1,9 +1,61 @@
 {
   "culture": "tr",
   "texts": {
-    "AppName": "FeatureRequestPortal",
+    "AppName": "Özellik Talep Portalı",
     "Menu:Home": "Ana sayfa",
     "Welcome": "Hoşgeldiniz",
-    "LongWelcomeMessage": "Uygulamaya hoşgeldiniz. Bu, ABP framework'ü üzerine bina edilmiş bir başlangıç projesidir. Daha fazla bilgi için abp.io adresini ziyaret edebilirsiniz."
+    "LongWelcomeMessage": "Uygulamaya hoşgeldiniz. Bu, ABP framework'ü üzerine bina edilmiş bir başlangıç projesidir. Daha fazla bilgi için abp.io adresini ziyaret edebilirsiniz.",
+
+    "Menu:FeatureRequests": "Özellik Talepleri",
+    "Menu:NewFeatureRequest": "Yeni Talep",
+
+    "FeatureRequests": "Özellik Talepleri",
+    "FeatureRequestsDescription": "Bir sonraki modelde hangi özellikleri görmek istediğinizi yazın, diğer fikirleri oylayın.",
+    "NewFeatureRequest": "Yeni Özellik Talebi",
+    "CreateFeatureRequest": "Oluştur",
+    "BackToList": "Listeye dön",
+
+    "Title": "Başlık",
+    "Description": "Açıklama",
+    "Status": "Durum",
+    "VoteCount": "Oy",
+    "CreationTime": "Oluşturulma",
+    "Actions": "İşlemler",
+    "AllStatuses": "Tüm durumlar",
+    "FilterByStatus": "Duruma göre filtrele",
+
+    "Vote": "Oy ver",
+    "Voted": "Oy verdiniz",
+    "VoteSuccess": "Oyunuz için teşekkürler!",
+    "LoginToVote": "Oy vermek için giriş yapın",
+    "LoginToComment": "Yorum yazmak için giriş yapın",
+
+    "Comments": "Yorumlar",
+    "NoComments": "Henüz yorum yok. İlk yorumu siz yazın!",
+    "YourComment": "Yorumunuz",
+    "AddComment": "Yorum ekle",
+    "CommentAdded": "Yorumunuz eklendi.",
+    "CommentMinLengthHint": "Yorumlar en az {0} karakter olmalıdır.",
+    "Anonymous": "Bilinmeyen kullanıcı",
+
+    "ChangeStatus": "Durumu değiştir",
+    "StatusUpdated": "Durum güncellendi.",
+    "DeleteFeatureRequest": "Sil",
+    "FeatureRequestDeletedMessage": "Özellik talebi silindi.",
+    "AreYouSureToDelete": "'{0}' kaydını silmek istediğinize emin misiniz?",
+
+    "Permission:FeatureRequests": "Özellik talepleri",
+    "Permission:FeatureRequests.Create": "Oluşturma",
+    "Permission:FeatureRequests.Delete": "Silme",
+    "Permission:FeatureRequests.ChangeStatus": "Durum değiştirme",
+
+    "Enum:FeatureRequestStatus.0": "Beklemede",
+    "Enum:FeatureRequestStatus.1": "Onaylandı",
+    "Enum:FeatureRequestStatus.2": "Reddedildi",
+    "Enum:FeatureRequestStatus.3": "Planlandı",
+    "Enum:FeatureRequestStatus.4": "Tamamlandı",
+    "Enum:FeatureRequestStatus.5": "İptal edildi",
+
+    "FeatureRequestPortal:AlreadyVoted": "Bu özellik talebine zaten oy verdiniz."
   }
 }
