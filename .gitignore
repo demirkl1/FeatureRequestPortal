@@ -263,3 +263,6 @@ src/FeatureRequestPortal.Blazor.Server.Tiered/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*
+
+# Runtime logs (repo kökünden çalıştırıldığında oluşur)
+Logs/
