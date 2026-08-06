@@ -1,0 +1,141 @@
+@page
+@using Volo.Abp.Users
+@model FeatureRequestPortal.Web.Pages.FeatureRequests.DetailModel
+@inject ICurrentUser CurrentUser
+@{
+    ViewBag.PageTitle = Model.FeatureRequest.Title;
+
+    var statusStyles = new[] { "secondary", "success", "danger", "info", "primary", "dark" };
+    var statusStyle = statusStyles[(int) Model.FeatureRequest.Status];
+    var loginUrl = "/Account/Login?returnUrl=" + Uri.EscapeDataString($"/FeatureRequests/Detail?id={Model.Id}");
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-row class="align-items-start">
+            <abp-column size-md="_9">
+                <abp-card-title>@Model.FeatureRequest.Title</abp-card-title>
+                <span class="badge bg-@statusStyle">@L["Enum:FeatureRequestStatus." + (int) Model.FeatureRequest.Status]</span>
+                <span class="text-muted ms-2">
+                    @L["CreationTime"]: @Model.FeatureRequest.CreationTime.ToString("g")
+                </span>
+            </abp-column>
+            <abp-column size-md="_3" class="text-end">
+                <div class="display-6 fw-bold">@Model.FeatureRequest.VoteCount</div>
+                <div class="text-muted">@L["VoteCount"]</div>
+            </abp-column>
+        </abp-row>
+    </abp-card-header>
+
+    <abp-card-body>
+        <p style="white-space: pre-wrap">@Model.FeatureRequest.Description</p>
+
+        <div class="d-flex gap-2 flex-wrap mt-4">
+            <a href="/" class="btn btn-outline-secondary">@L["BackToList"]</a>
+
+            @if (!CurrentUser.IsAuthenticated)
+            {
+                <a href="@loginUrl" class="btn btn-primary">
+                    <i class="fa fa-thumbs-up me-1"></i> @L["LoginToVote"]
+                </a>
+            }
+            else if (Model.FeatureRequest.HasCurrentUserVoted)
+            {
+                <button type="button" class="btn btn-success" disabled>
+                    <i class="fa fa-check me-1"></i> @L["Voted"]
+                </button>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="Vote" asp-route-id="@Model.Id">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-thumbs-up me-1"></i> @L["Vote"]
+                    </button>
+                </form>
+            }
+
+            @if (Model.CanDelete)
+            {
+                <form method="post"
+                      asp-page-handler="Delete"
+                      asp-route-id="@Model.Id"
+                      data-confirm-message="@L["AreYouSureToDelete", Model.FeatureRequest.Title].Value"
+                      class="js-confirm-form">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-trash me-1"></i> @L["DeleteFeatureRequest"]
+                    </button>
+                </form>
+            }
+        </div>
+
+        @if (Model.CanChangeStatus)
+        {
+            <hr />
+            <form method="post" asp-page-handler="ChangeStatus" asp-route-id="@Model.Id" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="NewStatus" class="form-label">@L["ChangeStatus"]</label>
+                    <select asp-for="NewStatus" class="form-select">
+                        @foreach (var status in Model.Statuses)
+                        {
+                            <option value="@((int) status)" selected="@(status == Model.FeatureRequest.Status)">
+                                @L["Enum:FeatureRequestStatus." + (int) status]
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary">@L["ChangeStatus"]</button>
+                </div>
+            </form>
+        }
+    </abp-card-body>
+</abp-card>
+
+<abp-card class="mt-3">
+    <abp-card-header>
+        <abp-card-title>@L["Comments"] (@Model.FeatureRequest.Comments.Count)</abp-card-title>
+    </abp-card-header>
+    <abp-card-body>
+        @if (!Model.FeatureRequest.Comments.Any())
+        {
+            <p class="text-muted">@L["NoComments"]</p>
+        }
+        else
+        {
+            <ul class="list-unstyled">
+                @foreach (var comment in Model.FeatureRequest.Comments)
+                {
+                    <li class="border-bottom py-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>@(comment.CreatorName ?? L["Anonymous"].Value)</strong>
+                            <span class="text-muted small">@comment.CreationTime.ToString("g")</span>
+                        </div>
+                        <div style="white-space: pre-wrap">@comment.Text</div>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <form method="post" asp-page-handler="Comment" asp-route-id="@Model.Id" class="mt-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-2">
+                    <label asp-for="NewComment.Text" class="form-label">@L["YourComment"]</label>
+                    <textarea asp-for="NewComment.Text" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="NewComment.Text" class="text-danger"></span>
+                    <div class="form-text">@L["CommentMinLengthHint", FeatureRequestConsts.MinCommentTextLength]</div>
+                </div>
+                <button type="submit" class="btn btn-primary">@L["AddComment"]</button>
+            </form>
+        }
+        else
+        {
+            <a href="@loginUrl" class="btn btn-outline-primary mt-3">@L["LoginToComment"]</a>
+        }
+    </abp-card-body>
+</abp-card>
+
+@section scripts {
+    <abp-script src="/Pages/FeatureRequests/Detail.js" />
+}

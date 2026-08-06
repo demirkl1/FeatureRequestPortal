@@ -1,4 +1,10 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Volo.Abp.AspNetCore.Mvc.UI
 @addTagHelper *, Volo.Abp.AspNetCore.Mvc.UI.Bootstrap
 @addTagHelper *, Volo.Abp.AspNetCore.Mvc.UI.Bundling
+@using FeatureRequestPortal.FeatureRequests
+@using FeatureRequestPortal.Localization
+@using FeatureRequestPortal.Permissions
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Packages.DatatablesNet
+@inject IHtmlLocalizer<FeatureRequestPortalResource> L

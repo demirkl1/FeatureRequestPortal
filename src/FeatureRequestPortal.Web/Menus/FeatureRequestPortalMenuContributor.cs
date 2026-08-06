@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 using FeatureRequestPortal.Localization;
 using FeatureRequestPortal.MultiTenancy;
+using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Identity.Web.Navigation;
 using Volo.Abp.SettingManagement.Web.Navigation;
 using Volo.Abp.TenantManagement.Web.Navigation;
 using Volo.Abp.UI.Navigation;
+using Volo.Abp.Users;
 
 namespace FeatureRequestPortal.Web.Menus;
 
@@ -26,13 +28,28 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
         context.Menu.Items.Insert(
             0,
             new ApplicationMenuItem(
-                FeatureRequestPortalMenus.Home,
-                l["Menu:Home"],
+                FeatureRequestPortalMenus.FeatureRequests,
+                l["Menu:FeatureRequests"],
                 "~/",
-                icon: "fas fa-home",
+                icon: "fas fa-lightbulb",
                 order: 0
             )
         );
+
+        /* Creating a request requires a logged in user, so hide the item from visitors. */
+        if (context.ServiceProvider.GetRequiredService<ICurrentUser>().IsAuthenticated)
+        {
+            context.Menu.Items.Insert(
+                1,
+                new ApplicationMenuItem(
+                    FeatureRequestPortalMenus.NewFeatureRequest,
+                    l["Menu:NewFeatureRequest"],
+                    "~/FeatureRequests/Create",
+                    icon: "fas fa-plus",
+                    order: 1
+                )
+            );
+        }
 
         if (MultiTenancyConsts.IsEnabled)
         {

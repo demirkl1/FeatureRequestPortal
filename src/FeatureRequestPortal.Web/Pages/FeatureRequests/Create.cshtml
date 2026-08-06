@@ -1,0 +1,33 @@
+@page
+@model FeatureRequestPortal.Web.Pages.FeatureRequests.CreateModel
+@{
+    ViewBag.PageTitle = L["NewFeatureRequest"].Value;
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-card-title>@L["NewFeatureRequest"]</abp-card-title>
+    </abp-card-header>
+    <abp-card-body>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="FeatureRequest.Title" class="form-label">@L["Title"]</label>
+                <input asp-for="FeatureRequest.Title" class="form-control" autofocus />
+                <span asp-validation-for="FeatureRequest.Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FeatureRequest.Description" class="form-label">@L["Description"]</label>
+                <textarea asp-for="FeatureRequest.Description" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="FeatureRequest.Description" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@L["CreateFeatureRequest"]</button>
+                <a href="/" class="btn btn-outline-secondary">@L["BackToList"]</a>
+            </div>
+        </form>
+    </abp-card-body>
+</abp-card>
