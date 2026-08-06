@@ -45,7 +45,6 @@
     "AreYouSureToDelete": "'{0}' kaydını silmek istediğinize emin misiniz?",
 
     "Permission:FeatureRequests": "Özellik talepleri",
-    "Permission:FeatureRequests.Create": "Oluşturma",
     "Permission:FeatureRequests.Delete": "Silme",
     "Permission:FeatureRequests.ChangeStatus": "Durum değiştirme",
 

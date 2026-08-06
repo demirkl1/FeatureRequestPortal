@@ -9,8 +9,21 @@ public class FeatureRequestPortalPermissionDefinitionProvider : PermissionDefini
     public override void Define(IPermissionDefinitionContext context)
     {
         var myGroup = context.AddGroup(FeatureRequestPortalPermissions.GroupName);
-        //Define your own permissions here. Example:
-        //myGroup.AddPermission(FeatureRequestPortalPermissions.MyPermission1, L("Permission:MyPermission1"));
+
+        var featureRequests = myGroup.AddPermission(
+            FeatureRequestPortalPermissions.FeatureRequests.Default,
+            L("Permission:FeatureRequests")
+        );
+
+        featureRequests.AddChild(
+            FeatureRequestPortalPermissions.FeatureRequests.ChangeStatus,
+            L("Permission:FeatureRequests.ChangeStatus")
+        );
+
+        featureRequests.AddChild(
+            FeatureRequestPortalPermissions.FeatureRequests.Delete,
+            L("Permission:FeatureRequests.Delete")
+        );
     }
 
     private static LocalizableString L(string name)

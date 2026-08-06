@@ -6,6 +6,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>FeatureRequestPortal</RootNamespace>
+    <!-- RMG020: entity members (navigation properties, soft-delete/audit columns) that are
+         intentionally not exposed on the DTOs. -->
+    <NoWarn>$(NoWarn);RMG020</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

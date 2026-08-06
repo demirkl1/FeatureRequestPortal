@@ -45,7 +45,6 @@
     "AreYouSureToDelete": "Are you sure you want to delete '{0}'?",
 
     "Permission:FeatureRequests": "Feature requests",
-    "Permission:FeatureRequests.Create": "Create",
     "Permission:FeatureRequests.Delete": "Delete",
     "Permission:FeatureRequests.ChangeStatus": "Change status",
 
