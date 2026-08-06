@@ -3,6 +3,7 @@ using System;
 using FeatureRequestPortal.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace FeatureRequestPortal.Migrations
 {
     [DbContext(typeof(FeatureRequestPortalDbContext))]
-    partial class FeatureRequestPortalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806154116_Added_FeatureRequests")]
+    partial class Added_FeatureRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

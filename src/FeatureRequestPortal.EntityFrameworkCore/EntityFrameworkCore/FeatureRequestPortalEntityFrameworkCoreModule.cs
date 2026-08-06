@@ -1,4 +1,6 @@
 ﻿using System;
+using FeatureRequestPortal.EntityFrameworkCore.FeatureRequests;
+using FeatureRequestPortal.FeatureRequests;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -44,6 +46,7 @@ public class FeatureRequestPortalEntityFrameworkCoreModule : AbpModule
                 /* Remove "includeAllEntities: true" to create
                  * default repositories only for aggregate roots */
             options.AddDefaultRepositories(includeAllEntities: true);
+            options.AddRepository<FeatureRequest, EfCoreFeatureRequestRepository>();
         });
 
         Configure<AbpDbContextOptions>(options =>
