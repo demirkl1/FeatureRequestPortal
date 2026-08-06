@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: feature-request-portal-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: myPassword
+      POSTGRES_DB: FeatureRequestPortal
+    ports:
+      # Host 5432 lokal bir PostgreSQL tarafından kullanıldığı için 5433'e map edildi.
+      - "5433:5432"
+    volumes:
+      - feature-request-portal-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d FeatureRequestPortal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  feature-request-portal-pgdata:
