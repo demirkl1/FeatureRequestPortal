@@ -30,6 +30,12 @@ public class DetailModel : FeatureRequestPortalPageModel
 
     public bool CanDelete { get; private set; }
 
+    /// <summary>
+    /// Built here because IHtmlLocalizer.Value returns the raw resource string, so the
+    /// {0} placeholder would reach the confirmation dialog unformatted.
+    /// </summary>
+    public string DeleteConfirmationMessage { get; private set; } = string.Empty;
+
     private readonly IFeatureRequestAppService _featureRequestAppService;
 
     public DetailModel(IFeatureRequestAppService featureRequestAppService)
@@ -95,6 +101,7 @@ public class DetailModel : FeatureRequestPortalPageModel
         FeatureRequest = await _featureRequestAppService.GetAsync(Id);
         NewStatus = FeatureRequest.Status;
         Statuses = Enum.GetValues<FeatureRequestStatus>().ToList();
+        DeleteConfirmationMessage = L["AreYouSureToDelete", FeatureRequest.Title];
 
         CanChangeStatus = await AuthorizationService.IsGrantedAsync(
             FeatureRequestPortalPermissions.FeatureRequests.ChangeStatus);

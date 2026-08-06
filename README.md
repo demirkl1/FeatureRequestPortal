@@ -75,6 +75,27 @@ Oy verme ve yorum yazma butonları giriş bağlantısına dönüşür.
 
 ![Detay sayfası - anonim](docs/screenshots/02-detail-anonymous.jpg)
 
+### Liste — giriş yapmış kullanıcı
+
+Giriş yapan kullanıcı tüm durumları görür (Beklemede, Reddedildi, İptal edildi...).
+
+![Liste sayfası - giriş yapmış](docs/screenshots/03-list-authenticated.jpg)
+
+### Detay sayfası (admin)
+
+Oy verildiği için buton kilitlenmiş, yorum yazarı ve tarihi görünüyor; admin ek olarak
+durum değiştirme ve silme yapabiliyor.
+
+![Detay sayfası - admin](docs/screenshots/04-detail-admin.jpg)
+
+### Yeni özellik talebi
+
+![Yeni talep](docs/screenshots/05-create.jpg)
+
+### Silme onayı (soft-delete)
+
+![Silme onayı](docs/screenshots/06-delete-confirmation.jpg)
+
 ---
 
 ## Mimari
@@ -162,6 +183,12 @@ FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
 - **Anonim erişim ile yetkilendirmenin dengesi.** Uygulama servisi sınıf düzeyinde `[Authorize]`, liste ve
   detay metotları ise `[AllowAnonymous]`. Anonim bir kullanıcı `Approved` olmayan bir kaydın id'sini
   tahmin ederse, kaydın varlığını sızdırmamak için 403 yerine `EntityNotFoundException` dönülüyor.
+- **`IHtmlLocalizer.Value` metni formatlamıyor.** Silme onayı mesajını Razor içinde
+  `@L["AreYouSureToDelete", Title].Value` ile kurmuştum; ekranda `{0}` yer tutucusu ham haliyle
+  görünüyordu. `IHtmlLocalizer` formatlamayı ancak render sırasında yapıyor, `.Value` kaynak metnini
+  olduğu gibi döndürüyor. Mesajı `IStringLocalizer` kullanan PageModel'de kurmak sorunu çözdü.
+  Bunu ancak uygulamayı tarayıcıda gerçekten çalıştırınca fark ettim; testler bu tür görünüm
+  hatalarını yakalamıyor.
 - **Yapılandırmanın çalışma dizinine bağlı olması.** `dotnet run --project ...` şeklinde repo kökünden
   çalıştırıldığında `appsettings.json` okunmuyor ve "ConnectionString property has not been initialized"
   hatası alınıyor; komutları proje klasörünün içinden çalıştırmak gerekiyor.
