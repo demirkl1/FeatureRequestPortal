@@ -1,0 +1,33 @@
+.create-page {
+  max-width: 640px;
+}
+
+.create-page h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+
+.create-page__intro {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-6);
+}
+
+.create-page__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-page__error {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
+}
+
+.create-page__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
