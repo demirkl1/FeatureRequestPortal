@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
@@ -97,6 +98,26 @@ public class FeatureRequestPortalWebModule : AbpModule
                 serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", "8364deb2-5990-4717-995b-524eccf4df94");
             });
         }
+        else
+        {
+            /* ABP's development certificates live in the OS certificate store, which on macOS is the
+             * login Keychain. Signing a JWT then needs a Keychain authorisation the user has to click,
+             * so a host started without a GUI session (CI, `dotnet run` from a detached shell) blocks
+             * forever inside SecKeyCreateSignature on the first /connect/token call.
+             * Ephemeral keys are held in memory only, which sidesteps the Keychain entirely.
+             * They are regenerated on every restart, so tokens issued before a restart stop validating
+             * - acceptable in development, and never used outside it. */
+            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+            {
+                options.AddDevelopmentEncryptionAndSigningCertificate = false;
+            });
+
+            PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
+            {
+                serverBuilder.AddEphemeralEncryptionKey();
+                serverBuilder.AddEphemeralSigningKey();
+            });
+        }
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -111,6 +132,7 @@ public class FeatureRequestPortalWebModule : AbpModule
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
+        ConfigureCors(context, configuration);
 
         context.Services.AddMapperlyObjectMapper<FeatureRequestPortalWebModule>();
     }
@@ -177,6 +199,34 @@ public class FeatureRequestPortalWebModule : AbpModule
         });
     }
 
+    /// <summary>
+    /// The React SPA runs on its own origin (the Vite dev server), so the auto API controllers
+    /// and the OpenIddict token endpoint have to accept cross-origin calls from it.
+    /// </summary>
+    private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder
+                    .WithOrigins(
+                        configuration["App:CorsOrigins"]?
+                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.RemovePostFix("/"))
+                            .ToArray() ?? Array.Empty<string>()
+                    )
+                    /* ABP signals a localized business error through this header; without
+                     * exposing it the SPA cannot tell a business failure from a transport one. */
+                    .WithExposedHeaders("_AbpErrorFormat")
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+    }
+
     private void ConfigureSwaggerServices(IServiceCollection services)
     {
         services.AddAbpSwaggerGen(
@@ -209,6 +259,7 @@ public class FeatureRequestPortalWebModule : AbpModule
         app.UseCorrelationId();
         app.MapAbpStaticAssets();
         app.UseRouting();
+        app.UseCors();
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
 
