@@ -7,6 +7,7 @@ Senaryo: Bir araba firması yeni modelinde hangi özellikleri yapacağını mü�
 Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata geçiriliyor.
 
 **Teknolojiler:** ABP Framework 10.6 · .NET 10 · MVC / Razor Pages (LeptonX Lite) · EF Core · PostgreSQL · Mapperly · xUnit
+**Ek arayüz:** React 19 · TypeScript · Vite (Razor Pages arayüzünün yanında, aynı HTTP API'yi tüketen ayrı bir SPA)
 
 ---
 
@@ -52,10 +53,26 @@ Uygulama <https://localhost:44372> adresinde açılır.
 
 **Varsayılan admin hesabı:** `admin` / `1q2w3E*`
 
+### 4. (Opsiyonel) React SPA'yı çalıştır
+
+Razor Pages arayüzünün yanına, aynı backend'i HTTP API üzerinden tüketen ayrı bir
+**React + TypeScript** arayüzü eklendi. Razor tarafına dokunulmadı; ikisi yan yana çalışır.
+
+```bash
+cd src/FeatureRequestPortal.SPA
+npm install
+npm run dev
+```
+
+SPA <http://localhost:5173> adresinde açılır. **Backend'in ayrıca çalışıyor olması gerekir**
+(adım 3), çünkü Vite dev server'ı `/api` ve `/connect` isteklerini `https://localhost:44372`
+adresine proxy'ler. Proxy sayesinde tarayıcı self-signed sertifikayla hiç muhatap olmaz.
+
 ### Testler
 
 ```bash
-dotnet test
+dotnet test                                    # 26 test (Domain 10, EF Core 15, Web 1)
+cd src/FeatureRequestPortal.SPA && npx tsc --noEmit   # SPA tip kontrolü
 ```
 
 ---
@@ -98,6 +115,63 @@ durum değiştirme ve silme yapabiliyor.
 
 ---
 
+## Ekran görüntüleri — React SPA
+
+Aynı backend'in React + TypeScript arayüzü. Açık/koyu tema, tasarım token'ları,
+monospace teknik metadata ve erişilebilir bileşenler.
+
+### Liste — anonim ziyaretçi (açık tema)
+
+Anonim kullanıcı yalnızca `Approved` talepleri görür.
+
+![SPA liste anonim](docs/screenshots-spa/01-spa-list-anonymous.jpg)
+
+### Detay — anonim ziyaretçi
+
+Oy butonu devre dışı, gerekçesi yazılı; yorum formu yerine giriş çağrısı var.
+
+![SPA detay anonim](docs/screenshots-spa/02-spa-detail-anonymous.jpg)
+
+### Giriş ekranı
+
+![SPA giriş](docs/screenshots-spa/03-spa-login.jpg)
+
+### Liste — admin (koyu tema)
+
+Admin tüm statüleri görür; 6 statünün her biri ayrı rozetle gösterilir.
+
+![SPA liste admin](docs/screenshots-spa/04-spa-list-admin-dark.jpg)
+
+### Yeni talep
+
+Canlı karakter sayacı ve alan bazlı doğrulama.
+
+![SPA yeni talep](docs/screenshots-spa/05-spa-create.jpg)
+
+### Detay — admin
+
+Oy verilmiş durum, yorumlar, 100 karakter kuralı ve admin kontrolleri (statü + silme).
+
+![SPA detay admin](docs/screenshots-spa/06-spa-detail-admin-dark.jpg)
+
+### Silme onayı
+
+Native `<dialog>` ile focus-trap'li onay.
+
+![SPA silme onayı](docs/screenshots-spa/07-spa-delete-dialog.jpg)
+
+### Mükerrer oy engeli
+
+Domain'den gelen `FeatureRequestPortal:AlreadyVoted` hatası toast olarak gösterilir.
+
+![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg)
+
+### Mobil (380px)
+
+![SPA mobil](docs/screenshots-spa/09-spa-mobile.jpg)
+
+---
+
 ## Mimari
 
 Proje ABP'nin katmanlı (DDD) yapısını kullanır:
@@ -109,7 +183,31 @@ Proje ABP'nin katmanlı (DDD) yapısını kullanır:
 | `EntityFrameworkCore` | DbContext mapping'leri, `EfCoreFeatureRequestRepository`, migration'lar |
 | `Application.Contracts` | DTO'lar, `IFeatureRequestAppService`, permission tanımları |
 | `Application` | `FeatureRequestAppService`, Mapperly mapper'ları |
-| `Web` | Razor Pages (liste / detay / oluşturma), menü |
+| `Web` | Razor Pages (liste / detay / oluşturma), menü, auto API controller'lar, CORS |
+| `SPA` | React + TypeScript arayüz (ABP katmanı değil; ayrı bir Vite projesi) |
+
+### React SPA
+
+Razor Pages arayüzü **olduğu gibi korundu**; SPA onun yerine geçmez, yanında durur ve
+ABP'nin otomatik ürettiği HTTP API'yi tüketir.
+
+```
+src/FeatureRequestPortal.SPA/src/
+├── api/         http.ts (fetch sarmalayıcı), auth.ts, featureRequests.ts, types.ts
+├── auth/        AuthContext — oturum, currentUser, grantedPolicies
+├── components/  StatusBadge, VoteButton, ConfirmDialog, Toast, alan bileşenleri…
+├── pages/       ListPage, DetailPage, CreatePage, LoginPage
+└── styles/      tokens.css (tasarım token'ları) + global.css
+```
+
+- **Kimlik doğrulama:** OpenIddict `password` grant (`FeatureRequestPortal_SPA` client'ı).
+  Böylece giriş ekranı da SPA'nın kendi tasarımı içinde kalıyor; LeptonX login sayfasına
+  yönlendirme olmuyor. 401 alındığında bir kez `refresh_token` denenip istek tekrarlanır.
+- **Yetki:** `/api/abp/application-configuration` çağrısından `currentUser` ve
+  `grantedPolicies` okunur; admin kontrolleri `ChangeStatus` / `Delete` policy'lerine bağlıdır.
+- **Tasarım:** Tüm renk / boşluk / tipografi değerleri `tokens.css` içinde CSS custom
+  property olarak tanımlıdır. Koyu tema hem `prefers-color-scheme` hem de `data-theme`
+  üzerinden çalışır, kullanıcı tercihi `localStorage`'da saklanır.
 
 ### Domain modeli
 
@@ -192,6 +290,22 @@ FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
 - **Yapılandırmanın çalışma dizinine bağlı olması.** `dotnet run --project ...` şeklinde repo kökünden
   çalıştırıldığında `appsettings.json` okunmuyor ve "ConnectionString property has not been initialized"
   hatası alınıyor; komutları proje klasörünün içinden çalıştırmak gerekiyor.
+- **macOS'ta `/connect/token` isteğinin sunucuyu tamamen kilitlemesi.** SPA'yı bağlarken ilk giriş
+  denemesinde istek hiç dönmedi ve ardından sunucu *bütün* isteklere cevap vermez oldu; log,
+  token üretiminin ortasında kesiliyordu. `dotnet-stack` ile alınan managed stack dump kilidin yerini
+  netleştirdi: thread `AppleCryptoNative_SecKeyCreateSignature` içinde bekliyordu. Sebebi, ABP'nin
+  development'ta kullandığı imzalama sertifikasının macOS'ta **login Keychain**'de durması —
+  JWT imzalamak Keychain onayı gerektiriyor ve GUI oturumuna bağlı olmayan bir process (arka planda
+  başlatılmış `dotnet run`, CI) bu onayı hiç alamadığı için sonsuza kadar bekliyor. Development'ta
+  `AddEphemeralEncryptionKey()` / `AddEphemeralSigningKey()` kullanarak anahtarları bellekte tutmak
+  sorunu çözdü. Razor Pages arayüzü cookie authentication kullandığı için bu kod yoluna hiç girmiyordu;
+  hata ancak SPA token endpoint'ini kullanmaya başlayınca ortaya çıktı.
+- **Proxy arkasında ABP'nin antiforgery kontrolü.** SPA'dan yapılan `POST`'lar 400 dönüyordu, aynı istek
+  `curl` ile 200 dönüyordu. Fark şuydu: Vite proxy'si sayesinde SPA backend ile **aynı origin**'de
+  olduğu için tarayıcı ABP'nin antiforgery cookie'sini her istekte geri gönderiyor, ABP de isteği
+  cookie ile doğrulanmış sayıp `RequestVerificationToken` header'ı bekliyor; `curl`'de cookie
+  olmadığı için bu kontrol hiç tetiklenmiyordu. Çözüm, ABP'nin okunabilir `XSRF-TOKEN` cookie'sini
+  okuyup güvenli olmayan HTTP metotlarında bu header ile geri göndermek oldu.
 
 ## Öğrendiklerim
 
