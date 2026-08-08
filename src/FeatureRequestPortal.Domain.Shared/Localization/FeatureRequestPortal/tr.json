@@ -7,6 +7,7 @@
     "AllStatuses": "Tüm durumlar",
     "AlreadyHaveAnAccount": "Zaten hesabınız var mı?",
     "Anonymous": "Bilinmeyen kullanıcı",
+    "AnonymousSeesApprovedOnly": "Ziyaretçi olarak geziyorsunuz; bu yüzden yalnızca onaylanmış talepler listeleniyor. Tüm statüleri görmek için giriş yapın.",
     "AppName": "Özellik Talep Portalı",
     "Approve": "Onayla",
     "AreYouSureToApprove": "'{0}' onaylansın mı? Kullanıcı giriş yapabilecek ve e-posta ile bilgilendirilecek.",

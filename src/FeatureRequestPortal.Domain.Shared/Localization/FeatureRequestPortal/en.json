@@ -7,6 +7,7 @@
     "AllStatuses": "All statuses",
     "AlreadyHaveAnAccount": "Already have an account?",
     "Anonymous": "Unknown user",
+    "AnonymousSeesApprovedOnly": "You are browsing as a visitor, so only approved requests are listed. Sign in to see every status.",
     "AppName": "Feature Request Portal",
     "Approve": "Approve",
     "AreYouSureToApprove": "Approve '{0}'? They will be able to sign in and will be notified by email.",

@@ -38,18 +38,27 @@
         </abp-row>
     </abp-card-header>
     <abp-card-body>
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="StatusFilter" class="form-label">@L["FilterByStatus"]</label>
-                <select id="StatusFilter" class="form-select">
-                    <option value="">@L["AllStatuses"]</option>
-                    @foreach (var status in Model.Statuses)
-                    {
-                        <option value="@((int) status)">@L["Enum:FeatureRequestStatus." + (int) status]</option>
-                    }
-                </select>
+        @* A visitor only ever gets Approved rows, so offering the other statuses would just be a
+           filter that always returns nothing. The server enforces this either way. *@
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="StatusFilter" class="form-label">@L["FilterByStatus"]</label>
+                    <select id="StatusFilter" class="form-select">
+                        <option value="">@L["AllStatuses"]</option>
+                        @foreach (var status in Model.Statuses)
+                        {
+                            <option value="@((int) status)">@L["Enum:FeatureRequestStatus." + (int) status]</option>
+                        }
+                    </select>
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <p class="text-muted">@L["AnonymousSeesApprovedOnly"]</p>
+        }
 
         <abp-table striped-rows="true" id="FeatureRequestsTable"></abp-table>
     </abp-card-body>

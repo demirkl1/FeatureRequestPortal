@@ -48,9 +48,11 @@ $(function () {
             ajax: abp.libs.datatables.createAjax(
                 featureRequestPortal.featureRequests.featureRequest.getList,
                 function () {
-                    var status = statusFilter.val();
+                    /* The filter is not rendered for visitors, so val() is undefined there and
+                     * parseInt would send NaN. Anything non-numeric means "no status filter". */
+                    var status = parseInt(statusFilter.val(), 10);
                     return {
-                        status: status === '' ? null : parseInt(status, 10)
+                        status: isNaN(status) ? null : status
                     };
                 }
             ),
