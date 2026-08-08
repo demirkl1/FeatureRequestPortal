@@ -9,6 +9,9 @@ Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata
 **Teknolojiler:** ABP Framework 10.6 · .NET 10 · MVC / Razor Pages (LeptonX Lite) · EF Core · PostgreSQL · Mapperly · xUnit
 **Ek arayüz:** React 19 · TypeScript · Vite (Razor Pages arayüzünün yanında, aynı HTTP API'yi tüketen ayrı bir SPA)
 
+Öne çıkanlar: rol bazlı görünürlük · her kullanıcıya tek oy (geri çekilebilir) · e-posta doğrulamalı
+ve **admin onaylı** kayıt · e-posta ile şifre sıfırlama · Türkçe/İngilizce · seçilebilir sayfa boyutu
+
 ---
 
 ## Kurulum ve çalıştırma
@@ -68,12 +71,37 @@ SPA <http://localhost:5173> adresinde açılır. **Backend'in ayrıca çalışı
 (adım 3), çünkü Vite dev server'ı `/api` ve `/connect` isteklerini `https://localhost:44372`
 adresine proxy'ler. Proxy sayesinde tarayıcı self-signed sertifikayla hiç muhatap olmaz.
 
+### 5. E-posta gönderimi (kayıt ve şifre sıfırlama için)
+
+Kayıt doğrulama kodu, hesap onay bildirimi ve şifre sıfırlama linki e-posta ile gider.
+**SMTP ayarlanmazsa uygulama çalışmayı sürdürür:** mailler `Logs/emails/` altına dosya olarak
+yazılır ve konsola bir uyarı düşer. Böylece repoyu klonlayan biri hiçbir posta kutusu bilgisine
+ihtiyaç duymadan tüm akışı deneyebilir — doğrulama kodunu ve sıfırlama linkini o dosyalardan okur.
+
+Gerçekten göndermek için (Gmail örneği — hesapta 2FA açık olmalı ve normal parola değil
+**16 haneli uygulama şifresi** gerekir):
+
+```bash
+cd src/FeatureRequestPortal.Web
+dotnet user-secrets set "Settings:Abp.Mailing.Smtp.Host" "smtp.gmail.com"
+dotnet user-secrets set "Settings:Abp.Mailing.Smtp.UserName" "adresiniz@gmail.com"
+dotnet user-secrets set "Settings:Abp.Mailing.Smtp.Password" "uygulama-sifresi"
+dotnet user-secrets set "Settings:Abp.Mailing.DefaultFromAddress" "adresiniz@gmail.com"
+```
+
+Sırlar **user secrets**'ta tutulur, repoya girmez. `appsettings.secrets.json` git tarafından
+takip edildiği için oraya parola yazmayın.
+
 ### Testler
 
 ```bash
-dotnet test                                    # 26 test (Domain 10, EF Core 15, Web 1)
-cd src/FeatureRequestPortal.SPA && npx tsc --noEmit   # SPA tip kontrolü
+dotnet test                                    # 35 test (Domain 14, EF Core 20, Web 1)
+cd src/FeatureRequestPortal.SPA && npx tsc -b   # SPA tip kontrolü
 ```
+
+> `npx tsc --noEmit` bu projede **hiçbir şeyi kontrol etmez**: kökteki `tsconfig.json`
+> solution-style (`files: []` + `references`), dolayısıyla sessizce başarılı olur.
+> Gerçek kontrol `tsc -b`'dir, `npm run build` de onu çalıştırır.
 
 ---
 
@@ -166,9 +194,63 @@ Domain'den gelen `FeatureRequestPortal:AlreadyVoted` hatası toast olarak göste
 
 ![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg)
 
+### Oyu geri çekme
+
+Yanlışlıkla verilen oy onay sorulduktan sonra geri çekilebilir.
+
+![SPA oy geri çekme](docs/screenshots-spa/10-spa-withdraw-dialog.jpg)
+
+### Sayfa boyutu
+
+![SPA sayfa boyutu](docs/screenshots-spa/12-spa-page-size.jpg)
+
+### Türkçe
+
+![SPA Türkçe](docs/screenshots-spa/11-spa-turkish.jpg)
+
 ### Mobil (380px)
 
 ![SPA mobil](docs/screenshots-spa/09-spa-mobile.jpg)
+
+---
+
+## Ekran görüntüleri — kayıt, doğrulama ve onay
+
+### 1. Kayıt
+
+![Kayıt](docs/screenshots-accounts/01-signup.jpg)
+
+### 2. E-posta doğrulama kodu
+
+![Doğrulama kodu](docs/screenshots-accounts/02-verify-code.jpg)
+
+### 3. Yanlış kod reddediliyor
+
+![Yanlış kod](docs/screenshots-accounts/03-wrong-code.jpg)
+
+### 4. Onay bekleniyor
+
+![Onay bekleniyor](docs/screenshots-accounts/04-pending-approval.jpg)
+
+### 5. Admin onay kuyruğu
+
+Yalnızca e-postasını doğrulamış hesaplar listelenir.
+
+![Admin kuyruğu](docs/screenshots-accounts/05-admin-queue.jpg)
+
+### 6. Onay teyidi
+
+![Onay teyidi](docs/screenshots-accounts/06-approve-confirm.jpg)
+
+### 7. Şifre sıfırlama
+
+E-postadaki linkle ulaşılan sayfa.
+
+![Şifre sıfırlama](docs/screenshots-accounts/07-reset-password.jpg)
+
+### 8. Razor tarafında oyu geri çekme
+
+![Razor oy geri çekme](docs/screenshots-accounts/08-razor-withdraw-confirm.jpg)
 
 ---
 
@@ -183,8 +265,43 @@ Proje ABP'nin katmanlı (DDD) yapısını kullanır:
 | `EntityFrameworkCore` | DbContext mapping'leri, `EfCoreFeatureRequestRepository`, migration'lar |
 | `Application.Contracts` | DTO'lar, `IFeatureRequestAppService`, permission tanımları |
 | `Application` | `FeatureRequestAppService`, Mapperly mapper'ları |
-| `Web` | Razor Pages (liste / detay / oluşturma), menü, auto API controller'lar, CORS |
+| `Web` | Razor Pages (liste / detay / oluşturma / kayıt / onay), menü, auto API controller'lar, CORS, e-posta gönderimi |
 | `SPA` | React + TypeScript arayüz (ABP katmanı değil; ayrı bir Vite projesi) |
+
+### Kayıt, e-posta doğrulama ve admin onayı
+
+ABP'nin hazır kayıt sayfası kullanıcıyı kayıt olur olmaz **içeri alıyor**. Şartname onay
+gerektirdiği için o sayfa kapatıldı (`Abp.Account.IsSelfRegistrationEnabled = false`) ve akış
+`Pages/Accounts/` altında yeniden yazıldı. Bir hesap iki kapıdan geçmeden giriş yapamaz:
+
+```
+Kayıt  →  hesap IsActive=false olarak yaratılır, 6 haneli kod e-postalanır
+       →  kullanıcı kodu girer            → EmailConfirmed=true
+       →  admin onay kuyruğunda görünür   → admin onaylar → IsActive=true + bilgilendirme e-postası
+       →  artık giriş yapabilir
+```
+
+- **Kod nasıl üretiliyor?** ASP.NET Core Identity'nin TOTP tabanlı e-posta token sağlayıcısı ile
+  (`GenerateUserTokenAsync` / `VerifyUserTokenAsync`). Kodun süresi kendi içinde taşındığı için
+  yanına ayrı bir tablo, entity ya da migration eklemek gerekmedi.
+- **Girişi ne engelliyor?** `IsActive = false`. ABP'nin sign-in manager'ı bu bayrağı zaten kontrol
+  ediyor, yani engel tek bir yerde ve UI'dan bağımsız.
+- **Kuyrukta kim var?** Yalnızca `EmailConfirmed && !IsActive` olanlar. E-postasını doğrulamamış
+  bir kayıt henüz bir başvuru sayılmadığı için admin'in önüne hiç düşmüyor.
+- **Reddetme** hesabı siler, ama yalnızca hâlâ pasifse — aktif bir hesap bir reddet tıklamasıyla
+  silinemez.
+- Yetki: `FeatureRequestPortal.Users.Approve`.
+
+### E-posta gönderimi
+
+`ISmtpEmailSenderConfiguration` değiştirildi. Sebebi: ABP, SMTP parolasını **şifreli saklanmış**
+varsayıp okurken çözmeye çalışıyor; bizimki user secrets'ta düz metin olduğu için çözme işlemi onu
+bozardı. `GetPasswordAsync` virtual olmadığından değeri veren sınıfın komple değiştirilmesi gerekti.
+Host, port, SSL ve gönderen adresi hâlâ ABP'nin normal ayar hattından geliyor.
+
+SMTP tanımlı değilse `FileEmailSender` devreye girer ve mailleri `Logs/emails/` altına yazar.
+Sessizce yutmak yerine konsola **uyarı** düşer — hiçbir şey göndermeyen bir sender'ı production'da
+fark etmek can sıkıcı olur.
 
 ### React SPA
 
@@ -208,6 +325,26 @@ src/FeatureRequestPortal.SPA/src/
 - **Tasarım:** Tüm renk / boşluk / tipografi değerleri `tokens.css` içinde CSS custom
   property olarak tanımlıdır. Koyu tema hem `prefers-color-scheme` hem de `data-theme`
   üzerinden çalışır, kullanıcı tercihi `localStorage`'da saklanır.
+- **Dil:** `src/i18n/` altında elle yazılmış küçük bir çeviri katmanı var; `en` ve `tr`
+  sözlüklerinin ikisi de `Record<TranslationKey, string>` tipinde, dolayısıyla birinde eksik
+  kalan anahtar **derleme hatası** olur. Tarihler `Intl.DateTimeFormat` ile dile göre biçimlenir.
+
+### Oyu geri çekme
+
+Yanlışlıkla verilen bir oy geri çekilebilir; her iki arayüz de önce onay sorar.
+
+`FeatureRequest.RemoveVote(userId)` oy kaydını **tamamen siler**, soft-delete etmez. Sebebi
+`AppVotes` üzerindeki `(FeatureRequestId, CreatorId)` unique index'i: kayıt silinmeseydi aynı
+kullanıcı bir daha oy veremezdi. Bu davranış `Should_Allow_Voting_Again_After_Withdrawing`
+testiyle korunuyor. Oy verilmemişken çağrılırsa `FeatureRequestPortal:NotVoted` hatası döner.
+
+API tarafında `POST /api/app/feature-request/{id}/vote` ile `DELETE .../vote` birbirinin karşılığı.
+
+### Sayfa boyutu
+
+Kullanıcı 15 / 20 / 30 / 50 arasından seçer. Sunucu bu listeyi bir whitelist olarak uygular
+(`NormalizePageSize`): listede olmayan bir `MaxResultCount` sessizce 15'e düşer. Aksi hâlde
+`MaxResultCount=100000` ile liste endpoint'i tüm tabloyu döken bir uca dönüşürdü.
 
 ### Domain modeli
 
@@ -265,6 +402,18 @@ FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
    anlaşılır kılıyor ve kullanıcı oy sıralamasından geri dönebiliyor.
 5. **PostgreSQL portu 5433.** Geliştirme makinelerinde 5432 sıklıkla dolu olduğu için Docker Compose
    bu porta map ediyor.
+6. **Oy geri çekme oyu siler, tersine kayıt bırakmaz.** Kim oy verip geri çekti bilgisi tutulmuyor;
+   şartname bunu istemiyor ve `(FeatureRequestId, CreatorId)` unique index'i zaten kullanıcı başına
+   tek satıra izin veriyor. Denetim izi gerekseydi `Vote`'u soft-delete edip index'e `IsDeleted`
+   eklemek gerekirdi.
+7. **Statü geçişlerinde kural yok.** Admin herhangi bir statüden herhangi birine geçebiliyor;
+   şartnamede geçiş kuralı tanımlı değil ve admin'in yanlışlıkla verdiği kararı geri alabilmesi
+   pratikte daha değerli görünüyor. Gerekseydi `FeatureRequest.SetStatus` içine bir state machine
+   konurdu.
+8. **Doğrulama kodu 6 hane ve süreli.** Identity'nin TOTP tabanlı sağlayıcısı kullanıldığı için
+   uzunluk bir tercih değil, sağlayıcının çıktısı; kod tekrar istenebiliyor.
+9. **Onaylanmayan hesap silinmiyor, bekliyor.** Reddetme ayrı bir aksiyon ve yalnızca hâlâ pasif
+   hesaplarda çalışıyor.
 
 ## Zorlandığım noktalar
 
@@ -306,6 +455,20 @@ FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
   cookie ile doğrulanmış sayıp `RequestVerificationToken` header'ı bekliyor; `curl`'de cookie
   olmadığı için bu kontrol hiç tetiklenmiyordu. Çözüm, ABP'nin okunabilir `XSRF-TOKEN` cookie'sini
   okuyup güvenli olmayan HTTP metotlarında bu header ile geri göndermek oldu.
+- **Sonradan eklenen permission mevcut veritabanına düşmüyor.** `Users.Approve` yetkisini ekleyip
+  admin ile giriş yaptığımda yeni admin sayfasına erişemedim. Sebep: ABP tüm yetkileri admin rolüne
+  **yalnızca o rolü ilk yarattığı anda** veriyor; sonradan tanımlanan bir permission mevcut bir
+  veritabanına hiç ulaşmıyor. Sıfır veritabanında sorun görünmüyor, bu yüzden fark etmesi kolay
+  değil. `AdminPermissionDataSeedContributor` ile yetkiyi idempotent şekilde vererek çözdüm —
+  güncellenen veritabanlarını onarıyor, yeni kurulumları etkilemiyor.
+- **`BusinessException.Message` lokalize metni taşımıyor.** Yanlış doğrulama kodunda ekranda hiçbir
+  hata görünmüyordu. ABP hata kodunu mesaja ancak exception'ı HTTP cevabına çevirirken dönüştürüyor;
+  bir Razor sayfasında `catch` edip `exception.Message` yazdırdığınızda elinizde kod var, cümle yok.
+  Mesajı `IStringLocalizer`'dan doğrudan almak gerekti.
+- **`npx tsc --noEmit` hiçbir şeyi kontrol etmiyordu.** SPA'nın kök `tsconfig.json` dosyası
+  solution-style (`files: []` + `references`) olduğu için bu komut sessizce başarılı oluyor —
+  sözlüğü bilerek bozduğumda bile "temiz" dedi. Gerçek kontrol `tsc -b`; `npm run build` de onu
+  çalıştırıyor. Yeşil bir çıktının doğrulama anlamına gelmediğinin iyi bir örneği.
 
 ## Öğrendiklerim
 
