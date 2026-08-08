@@ -44,6 +44,17 @@
                 <button type="button" class="btn btn-success" disabled>
                     <i class="fa fa-check me-1"></i> @L["Voted"]
                 </button>
+
+                @* A mis-click has to be undoable, but only behind a confirmation. *@
+                <form method="post"
+                      asp-page-handler="RemoveVote"
+                      asp-route-id="@Model.Id"
+                      data-confirm-message="@Model.RemoveVoteConfirmationMessage"
+                      class="js-confirm-form">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="fa fa-rotate-left me-1"></i> @L["RemoveVote"]
+                    </button>
+                </form>
             }
             else
             {

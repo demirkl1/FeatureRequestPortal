@@ -41,7 +41,9 @@ $(function () {
             order: [],
             searching: false,
             pageLength: 15,
-            lengthChange: false,
+            /* The server only honours these sizes (FeatureRequestConsts.AllowedPageSizes). */
+            lengthChange: true,
+            lengthMenu: [15, 20, 30, 50],
             scrollX: true,
             ajax: abp.libs.datatables.createAjax(
                 featureRequestPortal.featureRequests.featureRequest.getList,

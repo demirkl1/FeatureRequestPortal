@@ -36,6 +36,9 @@ public class DetailModel : FeatureRequestPortalPageModel
     /// </summary>
     public string DeleteConfirmationMessage { get; private set; } = string.Empty;
 
+    /// <summary>Built here for the same reason as <see cref="DeleteConfirmationMessage"/>.</summary>
+    public string RemoveVoteConfirmationMessage { get; private set; } = string.Empty;
+
     private readonly IFeatureRequestAppService _featureRequestAppService;
 
     public DetailModel(IFeatureRequestAppService featureRequestAppService)
@@ -63,6 +66,26 @@ public class DetailModel : FeatureRequestPortalPageModel
             return Page();
         }
 
+        return RedirectToPage(new { id = Id });
+    }
+
+    public async Task<IActionResult> OnPostRemoveVoteAsync()
+    {
+        try
+        {
+            await _featureRequestAppService.RemoveVoteAsync(Id);
+        }
+        catch (BusinessException exception)
+            when (exception.Code == FeatureRequestPortalDomainErrorCodes.NotVoted)
+        {
+            /* Can only happen when the vote was already withdrawn from another tab. */
+            Alerts.Warning(L["FeatureRequestPortal:NotVoted"].Value);
+            await LoadAsync();
+            return Page();
+        }
+
+        /* No alert here: alerts are request-scoped and would be dropped by the redirect.
+         * The button flipping back to "Vote" is the feedback, same as the vote handler. */
         return RedirectToPage(new { id = Id });
     }
 
@@ -102,6 +125,7 @@ public class DetailModel : FeatureRequestPortalPageModel
         NewStatus = FeatureRequest.Status;
         Statuses = Enum.GetValues<FeatureRequestStatus>().ToList();
         DeleteConfirmationMessage = L["AreYouSureToDelete", FeatureRequest.Title];
+        RemoveVoteConfirmationMessage = L["AreYouSureToRemoveVote"];
 
         CanChangeStatus = await AuthorizationService.IsGrantedAsync(
             FeatureRequestPortalPermissions.FeatureRequests.ChangeStatus);

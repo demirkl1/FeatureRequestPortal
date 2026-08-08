@@ -19,6 +19,9 @@ public interface IFeatureRequestAppService : IApplicationService
     /// <summary>One up-vote per user; a second call fails with a business exception.</summary>
     Task VoteAsync(Guid id);
 
+    /// <summary>Withdraws the current user's vote; fails when they have not voted.</summary>
+    Task RemoveVoteAsync(Guid id);
+
     Task<CommentDto> AddCommentAsync(Guid id, CreateCommentDto input);
 
     /// <summary>Admin only.</summary>

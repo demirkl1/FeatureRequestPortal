@@ -18,4 +18,10 @@ public static class FeatureRequestConsts
     public const int MaxCommentTextLength = 2000;
 
     public const int DefaultPageSize = 15;
+
+    /// <summary>
+    /// The page sizes offered in the UI. The application service rejects anything else, so a
+    /// crafted MaxResultCount cannot be used to pull the whole table in one request.
+    /// </summary>
+    public static readonly int[] AllowedPageSizes = { 15, 20, 30, 50 };
 }

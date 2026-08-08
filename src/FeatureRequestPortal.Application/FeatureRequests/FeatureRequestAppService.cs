@@ -40,7 +40,7 @@ public class FeatureRequestAppService : FeatureRequestPortalAppService, IFeature
         var featureRequests = await _featureRequestRepository.GetListAsync(
             NormalizeSorting(input.Sorting),
             input.SkipCount,
-            input.MaxResultCount,
+            NormalizePageSize(input.MaxResultCount),
             input.Status,
             onlyApproved
         );
@@ -86,6 +86,18 @@ public class FeatureRequestAppService : FeatureRequestPortalAppService, IFeature
         var featureRequest = await GetWithDetailsAsync(id);
 
         featureRequest.AddVote(GuidGenerator.Create(), CurrentUser.GetId());
+
+        await _featureRequestRepository.UpdateAsync(featureRequest, autoSave: true);
+    }
+
+    /// <summary>
+    /// Withdraws the current user's vote so an accidental click can be undone.
+    /// </summary>
+    public virtual async Task RemoveVoteAsync(Guid id)
+    {
+        var featureRequest = await GetWithDetailsAsync(id);
+
+        featureRequest.RemoveVote(CurrentUser.GetId());
 
         await _featureRequestRepository.UpdateAsync(featureRequest, autoSave: true);
     }
@@ -174,6 +186,17 @@ public class FeatureRequestAppService : FeatureRequestPortalAppService, IFeature
         }
 
         return dtos;
+    }
+
+    /// <summary>
+    /// Only the page sizes offered by the UI are honoured. Without this a caller could ask for
+    /// an arbitrarily large page and turn the list endpoint into a full table dump.
+    /// </summary>
+    private static int NormalizePageSize(int maxResultCount)
+    {
+        return FeatureRequestConsts.AllowedPageSizes.Contains(maxResultCount)
+            ? maxResultCount
+            : FeatureRequestConsts.DefaultPageSize;
     }
 
     /// <summary>
