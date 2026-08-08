@@ -120,6 +120,8 @@ export type TranslationKey =
   | 'login.submit'
   | 'login.submitting'
   | 'login.hint'
+  | 'login.noAccount'
+  | 'login.signUp'
   | 'toast.dismiss';
 
 export const en: Record<TranslationKey, string> = {
@@ -250,6 +252,8 @@ export const en: Record<TranslationKey, string> = {
   'login.submit': 'Sign in',
   'login.submitting': 'Signing in…',
   'login.hint': 'Seeded admin account:',
+  'login.noAccount': "Don't have an account?",
+  'login.signUp': 'Sign up',
 
   'toast.dismiss': 'Dismiss notification',
 };
@@ -383,6 +387,8 @@ export const tr: Record<TranslationKey, string> = {
   'login.submit': 'Giriş yap',
   'login.submitting': 'Giriş yapılıyor…',
   'login.hint': 'Hazır yönetici hesabı:',
+  'login.noAccount': 'Hesabınız yok mu?',
+  'login.signUp': 'Kayıt ol',
 
   'toast.dismiss': 'Bildirimi kapat',
 };

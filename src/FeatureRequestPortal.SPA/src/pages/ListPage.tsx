@@ -17,16 +17,8 @@ const DEFAULT_PAGE_SIZE = 15;
 const PAGE_SIZE_OPTIONS = [15, 20, 30, 50] as const;
 type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
-const PAGE_SIZE_STORAGE_KEY = 'frp.pageSize';
-
 function isValidPageSize(value: number): value is PageSize {
   return (PAGE_SIZE_OPTIONS as readonly number[]).includes(value);
-}
-
-function getStoredPageSize(): PageSize {
-  const raw = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
-  const parsed = raw === null ? NaN : Number(raw);
-  return isValidPageSize(parsed) ? parsed : DEFAULT_PAGE_SIZE;
 }
 
 const SORT_OPTIONS = [
@@ -40,7 +32,8 @@ export function ListPage() {
   const [items, setItems] = useState<FeatureRequestDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSize>(() => getStoredPageSize());
+  /* Always opens on 15; the other sizes are a per-visit choice, not a remembered preference. */
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
   const [statusFilter, setStatusFilter] = useState<FeatureRequestStatus | 'all'>('all');
   const [sorting, setSorting] = useState<string>(SORT_OPTIONS[0].value);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +64,6 @@ export function ListPage() {
 
   const handlePageSizeChange = (value: number) => {
     const nextPageSize = isValidPageSize(value) ? value : DEFAULT_PAGE_SIZE;
-    localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(nextPageSize));
     setPageSize(nextPageSize);
     setPage(1);
   };

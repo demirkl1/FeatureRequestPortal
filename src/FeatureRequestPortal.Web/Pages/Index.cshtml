@@ -26,8 +26,12 @@
                 }
                 else
                 {
-                    <a href="/Account/Login?returnUrl=%2FFeatureRequests%2FCreate" class="btn btn-outline-primary">
-                        <i class="fa fa-sign-in-alt me-1"></i> @L["NewFeatureRequest"]
+                    @* Visitors need somewhere obvious to start; the nav item alone is easy to miss. *@
+                    <a href="/Accounts/SignUp" class="btn btn-primary">
+                        <i class="fa fa-user-plus me-1"></i> @L["SignUp"]
+                    </a>
+                    <a href="/Account/Login?returnUrl=%2FFeatureRequests%2FCreate" class="btn btn-outline-primary ms-2">
+                        <i class="fa fa-sign-in-alt me-1"></i> @L["Login"]
                     </a>
                 }
             </abp-column>

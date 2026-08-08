@@ -277,6 +277,19 @@ public class FeatureRequestPortalWebModule : AbpModule
 
         app.UseCorrelationId();
         app.MapAbpStaticAssets();
+        /* ABP's own registration page is switched off, but its URL is what the login page links to
+         * and what anyone who has seen an ABP app will try. Send it to our flow instead of a 404. */
+        app.Use(async (httpContext, next) =>
+        {
+            if (httpContext.Request.Path.StartsWithSegments("/Account/Register"))
+            {
+                httpContext.Response.Redirect("/Accounts/SignUp");
+                return;
+            }
+
+            await next();
+        });
+
         app.UseRouting();
         app.UseCors();
         app.UseAuthentication();

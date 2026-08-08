@@ -92,6 +92,11 @@ export function LoginPage() {
             {isSubmitting ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
+        {/* Registration lives in the Razor app, so this leaves the SPA on purpose. */}
+        <p className="login-card__hint">
+          {t('login.noAccount')}{' '}
+          <a href="https://localhost:44372/Accounts/SignUp">{t('login.signUp')}</a>
+        </p>
         <p className="login-card__hint">
           {t('login.hint')} <span className="mono">admin</span> / <span className="mono">1q2w3E*</span>
         </p>
