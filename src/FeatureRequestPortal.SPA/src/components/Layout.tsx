@@ -1,12 +1,13 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { POLICIES } from '../auth/policies';
 import { useTranslation } from '../i18n';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageToggle } from './LanguageToggle';
 import './Layout.css';
 
 export function Layout() {
-  const { currentUser, logout, isLoading } = useAuth();
+  const { currentUser, logout, isLoading, hasPolicy } = useAuth();
   const { t } = useTranslation();
 
   return (
@@ -26,6 +27,14 @@ export function Layout() {
             {currentUser.isAuthenticated && (
               <NavLink to="/new" className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}>
                 {t('nav.newRequest')}
+              </NavLink>
+            )}
+            {hasPolicy(POLICIES.Approve) && (
+              <NavLink
+                to="/admin/registrations"
+                className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
+              >
+                {t('nav.registrations')}
               </NavLink>
             )}
           </nav>

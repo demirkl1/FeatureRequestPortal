@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AuthError } from '../api/auth';
 import { useTranslation } from '../i18n';
@@ -92,10 +92,8 @@ export function LoginPage() {
             {isSubmitting ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
-        {/* Registration lives in the Razor app, so this leaves the SPA on purpose. */}
         <p className="login-card__hint">
-          {t('login.noAccount')}{' '}
-          <a href="https://localhost:44372/Accounts/SignUp">{t('login.signUp')}</a>
+          {t('login.noAccount')} <Link to="/signup">{t('login.signUp')}</Link>
         </p>
         <p className="login-card__hint">
           {t('login.hint')} <span className="mono">admin</span> / <span className="mono">1q2w3E*</span>

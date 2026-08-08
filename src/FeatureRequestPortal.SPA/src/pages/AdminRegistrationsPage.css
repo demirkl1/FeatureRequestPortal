@@ -1,0 +1,54 @@
+.registrations-page__header {
+  margin-bottom: var(--space-2);
+}
+
+.registrations-page__header h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+
+.registrations-page__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.registrations-table-wrap {
+  overflow-x: auto;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.registrations-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+
+.registrations-table th,
+.registrations-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.registrations-table thead th {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-subtle);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.registrations-table tbody tr:not(:last-child) td {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.registrations-table__actions-col {
+  width: 1%;
+}
+
+.registrations-table__actions {
+  display: flex;
+  gap: var(--space-2);
+}

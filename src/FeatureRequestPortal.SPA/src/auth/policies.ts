@@ -2,4 +2,5 @@
 export const POLICIES = {
   ChangeStatus: 'FeatureRequestPortal.FeatureRequests.ChangeStatus',
   Delete: 'FeatureRequestPortal.FeatureRequests.Delete',
+  Approve: 'FeatureRequestPortal.Users.Approve',
 } as const;

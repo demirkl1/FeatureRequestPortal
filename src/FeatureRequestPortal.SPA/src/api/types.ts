@@ -91,3 +91,25 @@ export interface ApplicationConfigurationDto {
     grantedPolicies: Record<string, boolean>;
   };
 }
+
+export interface RegisterAccountDto {
+  userName: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterAccountResultDto {
+  userId: string;
+}
+
+export interface VerifyEmailDto {
+  userId: string;
+  code: string;
+}
+
+export interface PendingUserDto {
+  id: string;
+  userName: string;
+  email: string;
+  creationTime: string;
+}

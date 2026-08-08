@@ -16,6 +16,7 @@ export type TranslationKey =
   | 'nav.primaryAriaLabel'
   | 'nav.requests'
   | 'nav.newRequest'
+  | 'nav.registrations'
   | 'nav.signOut'
   | 'footer.tagline'
   | 'theme.light'
@@ -122,6 +123,53 @@ export type TranslationKey =
   | 'login.hint'
   | 'login.noAccount'
   | 'login.signUp'
+  | 'signup.title'
+  | 'signup.subtitle'
+  | 'signup.field.username'
+  | 'signup.field.usernameRequired'
+  | 'signup.field.email'
+  | 'signup.field.emailRequired'
+  | 'signup.field.emailInvalid'
+  | 'signup.field.password'
+  | 'signup.field.passwordRequired'
+  | 'signup.submit'
+  | 'signup.submitting'
+  | 'signup.error.generic'
+  | 'signup.haveAccount'
+  | 'verify.title'
+  | 'verify.subtitle'
+  | 'verify.subtitle.fallback'
+  | 'verify.field.code'
+  | 'verify.field.codeRequired'
+  | 'verify.submit'
+  | 'verify.submitting'
+  | 'verify.resend'
+  | 'verify.resending'
+  | 'verify.toast.resent'
+  | 'verify.error.generic'
+  | 'verify.error.resend'
+  | 'pendingApproval.title'
+  | 'pendingApproval.message'
+  | 'pendingApproval.backLink'
+  | 'registrations.title'
+  | 'registrations.subtitle'
+  | 'registrations.column.username'
+  | 'registrations.column.email'
+  | 'registrations.column.registered'
+  | 'registrations.column.actions'
+  | 'registrations.approve'
+  | 'registrations.reject'
+  | 'registrations.empty.title'
+  | 'registrations.empty.description'
+  | 'registrations.error.load'
+  | 'registrations.toast.approved'
+  | 'registrations.toast.rejected'
+  | 'registrations.toast.approveError'
+  | 'registrations.toast.rejectError'
+  | 'registrations.approveDialog.title'
+  | 'registrations.approveDialog.description'
+  | 'registrations.rejectDialog.title'
+  | 'registrations.rejectDialog.description'
   | 'toast.dismiss';
 
 export const en: Record<TranslationKey, string> = {
@@ -137,6 +185,7 @@ export const en: Record<TranslationKey, string> = {
   'nav.primaryAriaLabel': 'Primary',
   'nav.requests': 'Requests',
   'nav.newRequest': 'New request',
+  'nav.registrations': 'Pending registrations',
   'nav.signOut': 'Sign out',
   'footer.tagline': 'Feature Request Portal — React, TypeScript & react-router-dom.',
 
@@ -255,6 +304,58 @@ export const en: Record<TranslationKey, string> = {
   'login.noAccount': "Don't have an account?",
   'login.signUp': 'Sign up',
 
+  'signup.title': 'Sign up',
+  'signup.subtitle': 'Create an account to vote, comment, and submit feature requests.',
+  'signup.field.username': 'Username',
+  'signup.field.usernameRequired': 'Username is required.',
+  'signup.field.email': 'Email address',
+  'signup.field.emailRequired': 'Email address is required.',
+  'signup.field.emailInvalid': 'Enter a valid email address.',
+  'signup.field.password': 'Password',
+  'signup.field.passwordRequired': 'Password is required.',
+  'signup.submit': 'Create an account',
+  'signup.submitting': 'Creating account…',
+  'signup.error.generic': 'Something went wrong. Please try again.',
+  'signup.haveAccount': 'Already have an account?',
+
+  'verify.title': 'Verify your email',
+  'verify.subtitle': 'We emailed a 6 digit code to {email}.',
+  'verify.subtitle.fallback': 'We emailed a 6 digit code to your address.',
+  'verify.field.code': 'Verification code',
+  'verify.field.codeRequired': 'Enter the 6-digit code.',
+  'verify.submit': 'Verify',
+  'verify.submitting': 'Verifying…',
+  'verify.resend': 'Send a new code',
+  'verify.resending': 'Sending…',
+  'verify.toast.resent': 'A new code has been sent.',
+  'verify.error.generic': 'Unable to verify your email. Please try again.',
+  'verify.error.resend': 'Unable to send a new code right now.',
+
+  'pendingApproval.title': 'Waiting for approval',
+  'pendingApproval.message':
+    'Your email address is confirmed. An administrator now has to approve your registration; you will get an email as soon as that happens.',
+  'pendingApproval.backLink': 'Back to the list',
+
+  'registrations.title': 'Pending registrations',
+  'registrations.subtitle': 'Review new accounts waiting for approval.',
+  'registrations.column.username': 'Username',
+  'registrations.column.email': 'Email address',
+  'registrations.column.registered': 'Registered',
+  'registrations.column.actions': 'Actions',
+  'registrations.approve': 'Approve',
+  'registrations.reject': 'Reject',
+  'registrations.empty.title': 'There is nothing waiting for approval.',
+  'registrations.empty.description': 'New sign-ups will show up here once they confirm their email.',
+  'registrations.error.load': 'Failed to load pending registrations.',
+  'registrations.toast.approved': '{userName} has been approved.',
+  'registrations.toast.rejected': '{userName} has been rejected.',
+  'registrations.toast.approveError': 'Unable to approve this account.',
+  'registrations.toast.rejectError': 'Unable to reject this account.',
+  'registrations.approveDialog.title': 'Approve this account?',
+  'registrations.approveDialog.description': 'The user will be able to sign in once approved.',
+  'registrations.rejectDialog.title': 'Reject this account?',
+  'registrations.rejectDialog.description': 'This permanently deletes the account. This cannot be undone.',
+
   'toast.dismiss': 'Dismiss notification',
 };
 
@@ -271,6 +372,7 @@ export const tr: Record<TranslationKey, string> = {
   'nav.primaryAriaLabel': 'Birincil',
   'nav.requests': 'Talepler',
   'nav.newRequest': 'Yeni talep',
+  'nav.registrations': 'Bekleyen kayıtlar',
   'nav.signOut': 'Çıkış yap',
   'footer.tagline': 'Feature Request Portal — React, TypeScript ve react-router-dom.',
 
@@ -389,6 +491,58 @@ export const tr: Record<TranslationKey, string> = {
   'login.hint': 'Hazır yönetici hesabı:',
   'login.noAccount': 'Hesabınız yok mu?',
   'login.signUp': 'Kayıt ol',
+
+  'signup.title': 'Kayıt ol',
+  'signup.subtitle': 'Oy vermek, yorum yapmak ve özellik talebi göndermek için bir hesap oluşturun.',
+  'signup.field.username': 'Kullanıcı adı',
+  'signup.field.usernameRequired': 'Kullanıcı adı gereklidir.',
+  'signup.field.email': 'E-posta adresi',
+  'signup.field.emailRequired': 'E-posta adresi gereklidir.',
+  'signup.field.emailInvalid': 'Geçerli bir e-posta adresi girin.',
+  'signup.field.password': 'Parola',
+  'signup.field.passwordRequired': 'Parola gereklidir.',
+  'signup.submit': 'Hesap oluştur',
+  'signup.submitting': 'Hesap oluşturuluyor…',
+  'signup.error.generic': 'Bir şeyler ters gitti. Lütfen tekrar deneyin.',
+  'signup.haveAccount': 'Zaten hesabınız var mı?',
+
+  'verify.title': 'E-postanızı doğrulayın',
+  'verify.subtitle': '{email} adresine 6 haneli bir kod gönderdik.',
+  'verify.subtitle.fallback': 'Adresinize 6 haneli bir kod gönderdik.',
+  'verify.field.code': 'Doğrulama kodu',
+  'verify.field.codeRequired': '6 haneli kodu girin.',
+  'verify.submit': 'Doğrula',
+  'verify.submitting': 'Doğrulanıyor…',
+  'verify.resend': 'Yeni kod gönder',
+  'verify.resending': 'Gönderiliyor…',
+  'verify.toast.resent': 'Yeni bir kod gönderildi.',
+  'verify.error.generic': 'E-postanız doğrulanamadı. Lütfen tekrar deneyin.',
+  'verify.error.resend': 'Şu anda yeni kod gönderilemiyor.',
+
+  'pendingApproval.title': 'Onay bekleniyor',
+  'pendingApproval.message':
+    'E-posta adresiniz doğrulandı. Şimdi kaydınızın bir yönetici tarafından onaylanması gerekiyor; onaylandığında size e-posta göndereceğiz.',
+  'pendingApproval.backLink': 'Listeye dön',
+
+  'registrations.title': 'Bekleyen kayıtlar',
+  'registrations.subtitle': 'Onay bekleyen yeni hesapları inceleyin.',
+  'registrations.column.username': 'Kullanıcı adı',
+  'registrations.column.email': 'E-posta adresi',
+  'registrations.column.registered': 'Kayıt tarihi',
+  'registrations.column.actions': 'İşlemler',
+  'registrations.approve': 'Onayla',
+  'registrations.reject': 'Reddet',
+  'registrations.empty.title': 'Onay bekleyen kayıt yok.',
+  'registrations.empty.description': 'Yeni kayıtlar e-postalarını doğruladıklarında burada görünecek.',
+  'registrations.error.load': 'Bekleyen kayıtlar yüklenemedi.',
+  'registrations.toast.approved': '{userName} onaylandı.',
+  'registrations.toast.rejected': '{userName} reddedildi.',
+  'registrations.toast.approveError': 'Bu hesap onaylanamadı.',
+  'registrations.toast.rejectError': 'Bu hesap reddedilemedi.',
+  'registrations.approveDialog.title': 'Bu hesap onaylansın mı?',
+  'registrations.approveDialog.description': 'Kullanıcı onaylandıktan sonra giriş yapabilecek.',
+  'registrations.rejectDialog.title': 'Bu hesap reddedilsin mi?',
+  'registrations.rejectDialog.description': 'Bu işlem hesabı kalıcı olarak siler. Geri alınamaz.',
 
   'toast.dismiss': 'Bildirimi kapat',
 };

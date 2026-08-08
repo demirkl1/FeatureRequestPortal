@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, HTMLAttributes } from 'react';
 
 interface TextFieldProps {
   label: string;
@@ -15,6 +15,7 @@ interface TextFieldProps {
   autoComplete?: string;
   type?: string;
   placeholder?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
 }
 
 export function TextField({
@@ -30,6 +31,7 @@ export function TextField({
   autoComplete,
   type = 'text',
   placeholder,
+  inputMode,
 }: TextFieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
@@ -64,6 +66,7 @@ export function TextField({
         autoComplete={autoComplete}
         maxLength={maxLength}
         required={required}
+        inputMode={inputMode}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
