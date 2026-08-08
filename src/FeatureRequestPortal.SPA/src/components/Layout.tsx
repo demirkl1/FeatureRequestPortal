@@ -1,44 +1,48 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useTranslation } from '../i18n';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import './Layout.css';
 
 export function Layout() {
   const { currentUser, logout, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">
-        Skip to content
+        {t('nav.skipToContent')}
       </a>
       <header className="app-header">
         <div className="app-header__inner">
           <Link to="/" className="app-header__brand">
-            Feature Request Portal
+            {t('nav.brand')}
           </Link>
-          <nav className="app-header__nav" aria-label="Primary">
+          <nav className="app-header__nav" aria-label={t('nav.primaryAriaLabel')}>
             <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}>
-              Requests
+              {t('nav.requests')}
             </NavLink>
             {currentUser.isAuthenticated && (
               <NavLink to="/new" className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}>
-                New request
+                {t('nav.newRequest')}
               </NavLink>
             )}
           </nav>
           <div className="app-header__actions">
+            <LanguageToggle />
             <ThemeToggle />
             {!isLoading &&
               (currentUser.isAuthenticated ? (
                 <div className="app-header__user">
                   <span className="app-header__username mono">{currentUser.userName}</span>
                   <button type="button" className="button button--ghost button--sm" onClick={logout}>
-                    Sign out
+                    {t('nav.signOut')}
                   </button>
                 </div>
               ) : (
                 <Link to="/login" className="button button--primary button--sm">
-                  Sign in
+                  {t('common.signIn')}
                 </Link>
               ))}
           </div>
@@ -48,7 +52,7 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="app-footer">
-        <p>Feature Request Portal — React, TypeScript &amp; react-router-dom.</p>
+        <p>{t('footer.tagline')}</p>
       </footer>
     </div>
   );

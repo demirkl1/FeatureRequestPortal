@@ -55,3 +55,7 @@ export function addComment(id: string, dto: CreateCommentDto): Promise<CommentDt
 export function voteFeatureRequest(id: string): Promise<void> {
   return apiPost(`/api/app/feature-request/${id}/vote`);
 }
+
+export function removeVote(id: string): Promise<void> {
+  return apiDelete(`/api/app/feature-request/${id}/vote`);
+}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import type { ReactElement } from 'react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { LanguageProvider } from './i18n';
 import { ToastProvider } from './components/ToastProvider';
 import { Layout } from './components/Layout';
 import { ListPage } from './pages/ListPage';
@@ -42,13 +43,15 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <AppRoutes />
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
 

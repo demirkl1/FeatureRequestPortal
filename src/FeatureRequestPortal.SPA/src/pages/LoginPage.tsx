@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AuthError } from '../api/auth';
+import { useTranslation } from '../i18n';
 import './LoginPage.css';
 
 interface LoginLocationState {
@@ -13,6 +14,7 @@ export function LoginPage() {
   const { currentUser, login, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function LoginPage() {
       const state = location.state as LoginLocationState | null;
       navigate(state?.from?.pathname ?? '/', { replace: true });
     } catch (err) {
-      setError(err instanceof AuthError ? err.message : 'Unable to sign in. Please try again.');
+      setError(err instanceof AuthError ? err.message : t('login.error.generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -41,12 +43,12 @@ export function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>Sign in</h1>
-        <p className="login-card__subtitle">Access your account to vote, comment, and submit requests.</p>
+        <h1>{t('login.title')}</h1>
+        <p className="login-card__subtitle">{t('login.subtitle')}</p>
         <form onSubmit={handleSubmit} noValidate>
           <div className="field">
             <label htmlFor="login-username" className="field__label">
-              Username
+              {t('login.username')}
             </label>
             <input
               id="login-username"
@@ -62,7 +64,7 @@ export function LoginPage() {
           </div>
           <div className="field">
             <label htmlFor="login-password" className="field__label">
-              Password
+              {t('login.password')}
             </label>
             <input
               id="login-password"
@@ -87,11 +89,11 @@ export function LoginPage() {
             className="button button--primary button--block"
             disabled={isSubmitting || !username || !password}
           >
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+            {isSubmitting ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
         <p className="login-card__hint">
-          Seeded admin account: <span className="mono">admin</span> / <span className="mono">1q2w3E*</span>
+          {t('login.hint')} <span className="mono">admin</span> / <span className="mono">1q2w3E*</span>
         </p>
       </div>
     </div>

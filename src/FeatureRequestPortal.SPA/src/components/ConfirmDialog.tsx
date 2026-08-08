@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from '../i18n';
 import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
@@ -21,13 +22,16 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   isDangerous,
   isBusy,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('common.confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('common.cancel');
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export function ConfirmDialog({
       </p>
       <div className="confirm-dialog__actions">
         <button type="button" className="button button--secondary" onClick={onCancel} disabled={isBusy}>
-          {cancelLabel}
+          {resolvedCancelLabel}
         </button>
         <button
           type="button"
@@ -74,7 +78,7 @@ export function ConfirmDialog({
           onClick={onConfirm}
           disabled={isBusy}
         >
-          {isBusy ? 'Working…' : confirmLabel}
+          {isBusy ? t('common.working') : resolvedConfirmLabel}
         </button>
       </div>
     </dialog>

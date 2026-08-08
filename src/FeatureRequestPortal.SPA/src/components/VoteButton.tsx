@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../i18n';
 import './VoteButton.css';
 
 interface VoteButtonProps {
@@ -7,24 +8,38 @@ interface VoteButtonProps {
   isAuthenticated: boolean;
   isBusy: boolean;
   onVote: () => void;
+  onWithdrawClick: () => void;
 }
 
-export function VoteButton({ voteCount, hasVoted, isAuthenticated, isBusy, onVote }: VoteButtonProps) {
-  const disabled = !isAuthenticated || hasVoted || isBusy;
-  const reason = !isAuthenticated
-    ? 'Sign in to vote on this request.'
-    : hasVoted
-      ? 'You already voted on this request.'
-      : null;
+export function VoteButton({
+  voteCount,
+  hasVoted,
+  isAuthenticated,
+  isBusy,
+  onVote,
+  onWithdrawClick,
+}: VoteButtonProps) {
+  const { t } = useTranslation();
+  const disabled = !isAuthenticated || isBusy;
+  const reason = !isAuthenticated ? t('vote.reason.signIn') : hasVoted ? t('vote.reason.voted') : null;
+
+  const handleClick = () => {
+    if (hasVoted) {
+      onWithdrawClick();
+    } else {
+      onVote();
+    }
+  };
 
   return (
     <div className="vote-button-group">
       <button
         type="button"
         className={`vote-button ${hasVoted ? 'vote-button--voted' : ''}`}
-        onClick={onVote}
+        onClick={handleClick}
         disabled={disabled}
         aria-pressed={hasVoted}
+        aria-label={hasVoted ? t('vote.aria.withdraw') : undefined}
         aria-describedby={reason ? 'vote-button-reason' : undefined}
       >
         <svg className="vote-button__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -35,17 +50,11 @@ export function VoteButton({ voteCount, hasVoted, isAuthenticated, isBusy, onVot
           )}
         </svg>
         <span className="vote-button__count mono">{voteCount}</span>
-        <span className="vote-button__label">{hasVoted ? 'Voted' : 'Vote'}</span>
+        <span className="vote-button__label">{t(hasVoted ? 'vote.label.voted' : 'vote.label.vote')}</span>
       </button>
       {reason && (
         <p id="vote-button-reason" className="vote-button__reason">
-          {reason}
-          {!isAuthenticated && (
-            <>
-              {' '}
-              <Link to="/login">Sign in</Link>
-            </>
-          )}
+          {!isAuthenticated ? <Link to="/login">{reason}</Link> : reason}
         </p>
       )}
     </div>

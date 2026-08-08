@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useTranslation } from '../i18n';
 import './Toast.css';
 
 type ToastVariant = 'error' | 'success' | 'info';
@@ -19,6 +20,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 const AUTO_DISMISS_MS = 6000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
 
@@ -46,7 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               className="toast__dismiss"
               onClick={() => dismiss(toast.id)}
-              aria-label="Dismiss notification"
+              aria-label={t('toast.dismiss')}
             >
               ×
             </button>

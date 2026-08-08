@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import './ErrorBanner.css';
 
 interface ErrorBannerProps {
@@ -6,6 +7,7 @@ interface ErrorBannerProps {
 }
 
 export function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
+  const { t } = useTranslation();
   return (
     <div className="error-banner" role="alert">
       <span className="error-banner__icon" aria-hidden="true">
@@ -14,7 +16,7 @@ export function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
       <span className="error-banner__message">{message}</span>
       {onRetry && (
         <button type="button" className="button button--ghost button--sm" onClick={onRetry}>
-          Retry
+          {t('common.retry')}
         </button>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from '../i18n';
 import './ThemeToggle.css';
 
 type Theme = 'light' | 'dark';
@@ -15,6 +16,7 @@ function getSystemPrefersDark(): boolean {
 }
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const [explicitTheme, setExplicitTheme] = useState<Theme | null>(() => getStoredTheme());
   const [systemDark, setSystemDark] = useState<boolean>(() => getSystemPrefersDark());
 
@@ -41,19 +43,21 @@ export function ThemeToggle() {
     setExplicitTheme(next);
   };
 
+  const switchLabel = t(isDark ? 'theme.switchToLight' : 'theme.switchToDark');
+
   return (
     <button
       type="button"
       className="theme-toggle"
       onClick={toggle}
       aria-pressed={isDark}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
-      title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+      aria-label={switchLabel}
+      title={switchLabel}
     >
       <span aria-hidden="true" className="theme-toggle__icon">
         {isDark ? '🌙' : '☀️'}
       </span>
-      <span className="theme-toggle__label">{isDark ? 'Dark' : 'Light'}</span>
+      <span className="theme-toggle__label">{t(isDark ? 'theme.dark' : 'theme.light')}</span>
     </button>
   );
 }

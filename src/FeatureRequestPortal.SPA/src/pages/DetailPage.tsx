@@ -8,52 +8,43 @@ import {
   changeFeatureRequestStatus,
   deleteFeatureRequest,
   getFeatureRequest,
+  removeVote,
   voteFeatureRequest,
 } from '../api/featureRequests';
 import { ApiError } from '../api/http';
 import type { FeatureRequestDetailDto, FeatureRequestStatus } from '../api/types';
-import { StatusBadge } from '../components/StatusBadge';
+import { FEATURE_REQUEST_STATUSES } from '../api/types';
+import { StatusBadge, STATUS_TRANSLATION_KEYS } from '../components/StatusBadge';
 import { VoteButton } from '../components/VoteButton';
 import { TextAreaField } from '../components/TextAreaField';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Skeleton } from '../components/Skeleton';
 import { useToast } from '../components/ToastProvider';
+import { formatDate, useTranslation } from '../i18n';
 import './DetailPage.css';
-
-const STATUS_OPTIONS: { value: FeatureRequestStatus; label: string }[] = [
-  { value: 0, label: 'Pending' },
-  { value: 1, label: 'Approved' },
-  { value: 2, label: 'Rejected' },
-  { value: 3, label: 'Planned' },
-  { value: 4, label: 'Completed' },
-  { value: 5, label: 'Cancelled' },
-];
 
 const COMMENT_MIN = 100;
 const COMMENT_MAX = 2000;
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser, hasPolicy } = useAuth();
   const { showToast } = useToast();
+  const { t, language } = useTranslation();
+
+  const STATUS_OPTIONS: { value: FeatureRequestStatus; label: string }[] = FEATURE_REQUEST_STATUSES.map(
+    (status) => ({ value: status, label: t(STATUS_TRANSLATION_KEYS[status]) }),
+  );
 
   const [detail, setDetail] = useState<FeatureRequestDetailDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [isVoting, setIsVoting] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isWithdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
   const [commentText, setCommentText] = useState('');
   const [commentTouched, setCommentTouched] = useState(false);
@@ -75,11 +66,11 @@ export function DetailPage() {
       setDetail(data);
       setStatusValue(data.status);
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : 'Failed to load this request.');
+      setLoadError(err instanceof ApiError ? err.message : t('detail.error.load'));
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     void load();
@@ -91,11 +82,26 @@ export function DetailPage() {
     try {
       await voteFeatureRequest(id);
       await load();
-      showToast('Vote recorded.', 'success');
+      showToast(t('detail.toast.voteRecorded'), 'success');
     } catch (err) {
-      showToast(err instanceof ApiError ? err.message : 'Unable to vote right now.', 'error');
+      showToast(err instanceof ApiError ? err.message : t('detail.error.vote'), 'error');
     } finally {
       setIsVoting(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!id) return;
+    setIsWithdrawing(true);
+    try {
+      await removeVote(id);
+      await load();
+      setWithdrawDialogOpen(false);
+      showToast(t('detail.toast.voteWithdrawn'), 'success');
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : t('detail.error.withdraw'), 'error');
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -103,9 +109,9 @@ export function DetailPage() {
   const commentValidationError = !commentTouched
     ? null
     : commentLength === 0
-      ? 'Comment is required.'
+      ? t('detail.comments.required')
       : commentLength < COMMENT_MIN
-        ? `Comment must be at least ${COMMENT_MIN} characters (currently ${commentLength}).`
+        ? t('detail.comments.tooShort', { min: COMMENT_MIN, length: commentLength })
         : null;
 
   const isCommentValid = commentLength >= COMMENT_MIN && commentText.length <= COMMENT_MAX;
@@ -121,9 +127,9 @@ export function DetailPage() {
       setCommentText('');
       setCommentTouched(false);
       await load();
-      showToast('Comment added.', 'success');
+      showToast(t('detail.toast.commentAdded'), 'success');
     } catch (err) {
-      setCommentError(err instanceof ApiError ? err.message : 'Unable to add comment.');
+      setCommentError(err instanceof ApiError ? err.message : t('detail.error.comment'));
     } finally {
       setIsCommenting(false);
     }
@@ -135,9 +141,9 @@ export function DetailPage() {
     try {
       await changeFeatureRequestStatus(id, { status: statusValue });
       await load();
-      showToast('Status updated.', 'success');
+      showToast(t('detail.toast.statusUpdated'), 'success');
     } catch (err) {
-      showToast(err instanceof ApiError ? err.message : 'Unable to update status.', 'error');
+      showToast(err instanceof ApiError ? err.message : t('detail.error.status'), 'error');
     } finally {
       setIsChangingStatus(false);
     }
@@ -148,10 +154,10 @@ export function DetailPage() {
     setIsDeleting(true);
     try {
       await deleteFeatureRequest(id);
-      showToast('Request deleted.', 'success');
+      showToast(t('detail.toast.requestDeleted'), 'success');
       navigate('/');
     } catch (err) {
-      showToast(err instanceof ApiError ? err.message : 'Unable to delete this request.', 'error');
+      showToast(err instanceof ApiError ? err.message : t('detail.error.delete'), 'error');
       setIsDeleting(false);
       setDeleteDialogOpen(false);
     }
@@ -160,6 +166,7 @@ export function DetailPage() {
   if (isLoading) {
     return (
       <div className="detail-page" aria-busy="true">
+        <span className="sr-only">{t('common.loading')}</span>
         <Skeleton width="50%" height="2rem" />
         <Skeleton width="25%" height="1.2rem" />
         <Skeleton width="100%" height="6rem" />
@@ -170,7 +177,7 @@ export function DetailPage() {
   if (loadError || !detail) {
     return (
       <div className="detail-page">
-        <ErrorBanner message={loadError ?? 'This request could not be found.'} onRetry={load} />
+        <ErrorBanner message={loadError ?? t('detail.error.notFound')} onRetry={load} />
       </div>
     );
   }
@@ -178,7 +185,7 @@ export function DetailPage() {
   return (
     <div className="detail-page">
       <Link to="/" className="detail-page__back">
-        ← Back to requests
+        {t('detail.back')}
       </Link>
 
       <header className="detail-page__header">
@@ -188,47 +195,48 @@ export function DetailPage() {
         </div>
         <dl className="detail-page__meta mono">
           <div>
-            <dt>Created</dt>
-            <dd>{formatDate(detail.creationTime)}</dd>
+            <dt>{t('detail.meta.created')}</dt>
+            <dd>{formatDate(language, detail.creationTime, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</dd>
           </div>
           {detail.lastModificationTime && (
             <div>
-              <dt>Updated</dt>
-              <dd>{formatDate(detail.lastModificationTime)}</dd>
+              <dt>{t('detail.meta.updated')}</dt>
+              <dd>{formatDate(language, detail.lastModificationTime, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</dd>
             </div>
           )}
           <div>
-            <dt>ID</dt>
+            <dt>{t('detail.meta.id')}</dt>
             <dd>{detail.id}</dd>
           </div>
         </dl>
       </header>
 
-      <section className="detail-page__vote" aria-label="Voting">
+      <section className="detail-page__vote" aria-label={t('detail.vote.sectionLabel')}>
         <VoteButton
           voteCount={detail.voteCount}
           hasVoted={detail.hasCurrentUserVoted}
           isAuthenticated={currentUser.isAuthenticated}
-          isBusy={isVoting}
+          isBusy={isVoting || isWithdrawing}
           onVote={handleVote}
+          onWithdrawClick={() => setWithdrawDialogOpen(true)}
         />
       </section>
 
       {detail.description && (
         <section className="detail-page__description">
-          <h2>Description</h2>
+          <h2>{t('detail.description')}</h2>
           <p>{detail.description}</p>
         </section>
       )}
 
       {(hasPolicy(POLICIES.ChangeStatus) || hasPolicy(POLICIES.Delete)) && (
-        <section className="detail-page__admin" aria-label="Admin controls">
-          <h2>Admin controls</h2>
+        <section className="detail-page__admin" aria-label={t('detail.admin.heading')}>
+          <h2>{t('detail.admin.heading')}</h2>
           <div className="detail-page__admin-row">
             {hasPolicy(POLICIES.ChangeStatus) && (
               <div className="detail-page__status-control">
                 <label htmlFor="status-select" className="field__label">
-                  Status
+                  {t('detail.admin.status')}
                 </label>
                 <div className="detail-page__status-inline">
                   <select
@@ -249,34 +257,34 @@ export function DetailPage() {
                     onClick={handleStatusChange}
                     disabled={isChangingStatus || statusValue === detail.status}
                   >
-                    {isChangingStatus ? 'Updating…' : 'Update status'}
+                    {isChangingStatus ? t('detail.admin.updatingStatus') : t('detail.admin.updateStatus')}
                   </button>
                 </div>
               </div>
             )}
             {hasPolicy(POLICIES.Delete) && (
               <button type="button" className="button button--danger" onClick={() => setDeleteDialogOpen(true)}>
-                Delete request
+                {t('detail.admin.deleteRequest')}
               </button>
             )}
           </div>
         </section>
       )}
 
-      <section className="detail-page__comments" aria-label="Comments">
+      <section className="detail-page__comments" aria-label={t('detail.comments.heading')}>
         <h2>
-          Comments <span className="mono">({detail.comments.length})</span>
+          {t('detail.comments.heading')} <span className="mono">({detail.comments.length})</span>
         </h2>
         {detail.comments.length === 0 ? (
-          <p className="detail-page__no-comments">No comments yet.</p>
+          <p className="detail-page__no-comments">{t('detail.comments.none')}</p>
         ) : (
           <ul className="comment-list">
             {detail.comments.map((comment) => (
               <li key={comment.id} className="comment">
                 <div className="comment__meta">
-                  <span className="comment__author">{comment.creatorName ?? 'Unknown user'}</span>
+                  <span className="comment__author">{comment.creatorName ?? t('detail.comments.unknownUser')}</span>
                   <time className="comment__time mono" dateTime={comment.creationTime}>
-                    {formatDate(comment.creationTime)}
+                    {formatDate(language, comment.creationTime, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </time>
                 </div>
                 <p className="comment__text">{comment.text}</p>
@@ -288,7 +296,7 @@ export function DetailPage() {
         {currentUser.isAuthenticated ? (
           <form className="comment-form" onSubmit={handleCommentSubmit} noValidate>
             <TextAreaField
-              label="Add a comment"
+              label={t('detail.comments.addLabel')}
               value={commentText}
               onChange={setCommentText}
               onBlur={() => setCommentTouched(true)}
@@ -296,7 +304,7 @@ export function DetailPage() {
               maxLength={COMMENT_MAX}
               required
               error={commentValidationError}
-              hint={`Minimum ${COMMENT_MIN} characters required.`}
+              hint={t('detail.comments.hint', { min: COMMENT_MIN })}
               disabled={isCommenting}
               rows={5}
             />
@@ -306,25 +314,35 @@ export function DetailPage() {
               </p>
             )}
             <button type="submit" className="button button--primary" disabled={isCommenting || !isCommentValid}>
-              {isCommenting ? 'Posting…' : 'Post comment'}
+              {isCommenting ? t('detail.comments.posting') : t('detail.comments.post')}
             </button>
           </form>
         ) : (
           <p className="detail-page__signin-hint">
-            <Link to="/login">Sign in</Link> to add a comment.
+            <Link to="/login">{t('detail.comments.signInHint')}</Link>
           </p>
         )}
       </section>
 
       <ConfirmDialog
         open={isDeleteDialogOpen}
-        title="Delete this request?"
-        description="This soft-deletes the request and removes it from all listings. Only an administrator can restore it."
-        confirmLabel="Delete"
+        title={t('detail.delete.title')}
+        description={t('detail.delete.description')}
+        confirmLabel={t('detail.delete.confirm')}
         isDangerous
         isBusy={isDeleting}
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialogOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={isWithdrawDialogOpen}
+        title={t('detail.withdraw.title')}
+        description={t('detail.withdraw.description')}
+        confirmLabel={t('detail.withdraw.confirm')}
+        isBusy={isWithdrawing}
+        onConfirm={handleWithdraw}
+        onCancel={() => setWithdrawDialogOpen(false)}
       />
     </div>
   );

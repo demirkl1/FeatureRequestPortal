@@ -6,6 +6,7 @@ import { TextAreaField } from '../components/TextAreaField';
 import { createFeatureRequest } from '../api/featureRequests';
 import { ApiError } from '../api/http';
 import { useToast } from '../components/ToastProvider';
+import { useTranslation } from '../i18n';
 import './CreatePage.css';
 
 const TITLE_MIN = 10;
@@ -15,6 +16,7 @@ const DESCRIPTION_MAX = 2000;
 export function CreatePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [titleTouched, setTitleTouched] = useState(false);
@@ -25,9 +27,9 @@ export function CreatePage() {
   const titleError = !titleTouched
     ? null
     : trimmedTitleLength === 0
-      ? 'Title is required.'
+      ? t('create.field.titleRequired')
       : trimmedTitleLength < TITLE_MIN
-        ? `Title must be at least ${TITLE_MIN} characters (currently ${trimmedTitleLength}).`
+        ? t('create.field.titleTooShort', { min: TITLE_MIN, length: trimmedTitleLength })
         : null;
 
   const isValid = trimmedTitleLength >= TITLE_MIN && title.length <= TITLE_MAX && description.length <= DESCRIPTION_MAX;
@@ -40,10 +42,10 @@ export function CreatePage() {
     setIsSubmitting(true);
     try {
       const created = await createFeatureRequest({ title: title.trim(), description: description.trim() });
-      showToast('Request submitted. It is now pending review.', 'success');
+      showToast(t('create.toast.submitted'), 'success');
       navigate(`/requests/${created.id}`);
     } catch (err) {
-      setSubmitError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      setSubmitError(err instanceof ApiError ? err.message : t('create.error.generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -51,14 +53,11 @@ export function CreatePage() {
 
   return (
     <div className="create-page">
-      <h1>New feature request</h1>
-      <p className="create-page__intro">
-        Describe the feature you would like to see. Your request starts in the <strong>Pending</strong> state until
-        an administrator reviews it.
-      </p>
+      <h1>{t('create.title')}</h1>
+      <p className="create-page__intro">{t('create.intro')}</p>
       <form onSubmit={handleSubmit} noValidate className="create-page__form">
         <TextField
-          label="Title"
+          label={t('create.field.title')}
           value={title}
           onChange={setTitle}
           onBlur={() => setTitleTouched(true)}
@@ -66,19 +65,19 @@ export function CreatePage() {
           maxLength={TITLE_MAX}
           required
           error={titleError}
-          hint={`Between ${TITLE_MIN} and ${TITLE_MAX} characters.`}
+          hint={t('create.field.titleHint', { min: TITLE_MIN, max: TITLE_MAX })}
           disabled={isSubmitting}
-          placeholder="e.g. Add dark mode to the dashboard"
+          placeholder={t('create.field.titlePlaceholder')}
         />
         <TextAreaField
-          label="Description"
+          label={t('create.field.description')}
           value={description}
           onChange={setDescription}
           maxLength={DESCRIPTION_MAX}
-          hint="Optional. Up to 2000 characters."
+          hint={t('create.field.descriptionHint', { max: DESCRIPTION_MAX })}
           disabled={isSubmitting}
           rows={8}
-          placeholder="Explain the problem this feature solves and how it should work…"
+          placeholder={t('create.field.descriptionPlaceholder')}
         />
         {submitError && (
           <p className="create-page__error" role="alert">
@@ -87,7 +86,7 @@ export function CreatePage() {
         )}
         <div className="create-page__actions">
           <button type="submit" className="button button--primary" disabled={isSubmitting || !isValid}>
-            {isSubmitting ? 'Submitting…' : 'Submit request'}
+            {isSubmitting ? t('create.submitting') : t('create.submit')}
           </button>
         </div>
       </form>
