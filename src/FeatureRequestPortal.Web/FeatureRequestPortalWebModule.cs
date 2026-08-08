@@ -12,6 +12,7 @@ using FeatureRequestPortal.Localization;
 using FeatureRequestPortal.Web.Emailing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Volo.Abp.Emailing;
+using Volo.Abp.Emailing.Smtp;
 using FeatureRequestPortal.MultiTenancy;
 using FeatureRequestPortal.Web.Menus;
 using Microsoft.OpenApi;
@@ -232,18 +233,22 @@ public class FeatureRequestPortalWebModule : AbpModule
     }
 
     /// <summary>
-    /// Falls back to writing emails on disk when no SMTP host is configured, so registration and
-    /// password reset stay testable on a machine that has no mailbox credentials.
+    /// Picks the email sender explicitly, because ABP swaps in a NullEmailSender for every
+    /// development run - it only logs "USING NullEmailSender!" and drops the message, so a
+    /// perfectly good SMTP configuration silently sends nothing.
+    ///
+    /// With a host configured we put the real SMTP sender back. Without one we write messages to
+    /// Logs/emails, which keeps registration and password reset testable on a machine that has no
+    /// mailbox credentials - and unlike the null sender it says so out loud.
     /// </summary>
     private void ConfigureEmailing(ServiceConfigurationContext context, IConfiguration configuration)
     {
         var smtpHost = configuration["Settings:Abp.Mailing.Smtp.Host"];
 
-        if (smtpHost.IsNullOrWhiteSpace())
-        {
-            context.Services.Replace(
-                ServiceDescriptor.Transient<IEmailSender, FileEmailSender>());
-        }
+        context.Services.Replace(
+            smtpHost.IsNullOrWhiteSpace()
+                ? ServiceDescriptor.Transient<IEmailSender, FileEmailSender>()
+                : ServiceDescriptor.Transient<IEmailSender, SmtpEmailSender>());
     }
 
     private void ConfigureSwaggerServices(IServiceCollection services)

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Emailing;
 using Volo.Abp.Emailing.Smtp;
@@ -17,10 +18,14 @@ namespace FeatureRequestPortal.Web.Emailing;
 public class FeatureRequestPortalSmtpEmailSenderConfiguration : ISmtpEmailSenderConfiguration, ITransientDependency
 {
     private readonly ISettingProvider _settingProvider;
+    private readonly IConfiguration _configuration;
 
-    public FeatureRequestPortalSmtpEmailSenderConfiguration(ISettingProvider settingProvider)
+    public FeatureRequestPortalSmtpEmailSenderConfiguration(
+        ISettingProvider settingProvider,
+        IConfiguration configuration)
     {
         _settingProvider = settingProvider;
+        _configuration = configuration;
     }
 
     public async Task<string> GetHostAsync()
@@ -38,10 +43,16 @@ public class FeatureRequestPortalSmtpEmailSenderConfiguration : ISmtpEmailSender
         return await _settingProvider.GetOrNullAsync(EmailSettingNames.Smtp.UserName) ?? string.Empty;
     }
 
-    /// <summary>Returned as stored: user secrets already hold it in plain text.</summary>
-    public async Task<string> GetPasswordAsync()
+    /// <summary>
+    /// Read straight from configuration rather than through the setting provider. Going through
+    /// the provider still hands the value to ABP's decryption step, which throws a
+    /// CryptographicException on a plain-text secret, logs it, and only then falls back to the
+    /// original string. It works, but it puts an alarming stack trace in every startup log.
+    /// </summary>
+    public Task<string> GetPasswordAsync()
     {
-        return await _settingProvider.GetOrNullAsync(EmailSettingNames.Smtp.Password) ?? string.Empty;
+        return Task.FromResult(
+            _configuration[$"Settings:{EmailSettingNames.Smtp.Password}"] ?? string.Empty);
     }
 
     public async Task<string> GetDomainAsync()
