@@ -48,6 +48,12 @@ public class FeatureRequestPortalDomainSharedModule : AbpModule
                 .AddVirtualJson("/Localization/FeatureRequestPortal");
 
             options.DefaultResourceType = typeof(FeatureRequestPortalResource);
+
+            /* Only the two languages the portal is actually translated into are offered.
+             * The theme renders its language switcher from this list, so leaving it empty
+             * hides the switcher entirely. */
+            options.Languages.Add(new LanguageInfo("en", "en", "English"));
+            options.Languages.Add(new LanguageInfo("tr", "tr", "Türkçe"));
         });
 
         Configure<AbpExceptionLocalizationOptions>(options =>

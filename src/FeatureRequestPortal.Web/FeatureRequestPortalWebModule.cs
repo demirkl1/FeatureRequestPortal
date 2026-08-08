@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using FeatureRequestPortal.EntityFrameworkCore;
 using FeatureRequestPortal.Localization;
+using FeatureRequestPortal.Web.Emailing;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Volo.Abp.Emailing;
 using FeatureRequestPortal.MultiTenancy;
 using FeatureRequestPortal.Web.Menus;
 using Microsoft.OpenApi;
@@ -133,6 +136,7 @@ public class FeatureRequestPortalWebModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureCors(context, configuration);
+        ConfigureEmailing(context, configuration);
 
         context.Services.AddMapperlyObjectMapper<FeatureRequestPortalWebModule>();
     }
@@ -225,6 +229,21 @@ public class FeatureRequestPortalWebModule : AbpModule
                     .AllowCredentials();
             });
         });
+    }
+
+    /// <summary>
+    /// Falls back to writing emails on disk when no SMTP host is configured, so registration and
+    /// password reset stay testable on a machine that has no mailbox credentials.
+    /// </summary>
+    private void ConfigureEmailing(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        var smtpHost = configuration["Settings:Abp.Mailing.Smtp.Host"];
+
+        if (smtpHost.IsNullOrWhiteSpace())
+        {
+            context.Services.Replace(
+                ServiceDescriptor.Transient<IEmailSender, FileEmailSender>());
+        }
     }
 
     private void ConfigureSwaggerServices(IServiceCollection services)

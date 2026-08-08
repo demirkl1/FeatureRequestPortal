@@ -1,0 +1,41 @@
+@page
+@model FeatureRequestPortal.Web.Pages.Accounts.VerifyEmailModel
+@{
+    ViewBag.PageTitle = L["VerifyEmailTitle"].Value;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <abp-card>
+            <abp-card-header>
+                <abp-card-title>@L["VerifyEmailTitle"]</abp-card-title>
+            </abp-card-header>
+            <abp-card-body>
+                <p class="text-muted">@L["VerifyEmailDescription", Model.CodeLength, Model.MaskedEmail]</p>
+
+                <form method="post">
+                    <input type="hidden" asp-for="UserId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Code" class="form-label">@L["VerificationCode"]</label>
+                        <input asp-for="Code"
+                               class="form-control form-control-lg text-center"
+                               style="letter-spacing: .5rem"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               maxlength="@Model.CodeLength"
+                               autofocus />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">@L["VerifyButton"]</button>
+                </form>
+
+                <form method="post" asp-page-handler="Resend" class="mt-2">
+                    <input type="hidden" asp-for="UserId" />
+                    <button type="submit" class="btn btn-link w-100">@L["ResendCode"]</button>
+                </form>
+            </abp-card-body>
+        </abp-card>
+    </div>
+</div>

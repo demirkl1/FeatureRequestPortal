@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using FeatureRequestPortal.Localization;
+using FeatureRequestPortal.Permissions;
 using FeatureRequestPortal.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Identity.Web.Navigation;
@@ -20,7 +21,7 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
         }
     }
 
-    private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
+    private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
     {
         var administration = context.Menu.GetAdministration();
         var l = context.GetLocalizer<FeatureRequestPortalResource>();
@@ -35,6 +36,35 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
                 order: 0
             )
         );
+
+        /* Registration replaces ABP's built-in one, so visitors get the entry point here. */
+        if (!context.ServiceProvider.GetRequiredService<ICurrentUser>().IsAuthenticated)
+        {
+            context.Menu.Items.Insert(
+                1,
+                new ApplicationMenuItem(
+                    FeatureRequestPortalMenus.SignUp,
+                    l["SignUp"],
+                    "~/Accounts/SignUp",
+                    icon: "fas fa-user-plus",
+                    order: 1
+                )
+            );
+        }
+
+        if (await context.IsGrantedAsync(FeatureRequestPortalPermissions.Users.Approve))
+        {
+            context.Menu.Items.Insert(
+                1,
+                new ApplicationMenuItem(
+                    FeatureRequestPortalMenus.PendingRegistrations,
+                    l["Menu:PendingRegistrations"],
+                    "~/Accounts/PendingRegistrations",
+                    icon: "fas fa-user-check",
+                    order: 2
+                )
+            );
+        }
 
         /* Creating a request requires a logged in user, so hide the item from visitors. */
         if (context.ServiceProvider.GetRequiredService<ICurrentUser>().IsAuthenticated)
@@ -63,6 +93,6 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
         administration.SetSubItemOrder(IdentityMenuNames.GroupName, 2);
         administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 3);
 
-        return Task.CompletedTask;
+
     }
 }

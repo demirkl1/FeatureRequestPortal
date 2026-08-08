@@ -1,0 +1,48 @@
+@page
+@model FeatureRequestPortal.Web.Pages.Accounts.SignUpModel
+@{
+    ViewBag.PageTitle = L["SignUpTitle"].Value;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <abp-card>
+            <abp-card-header>
+                <abp-card-title>@L["SignUpTitle"]</abp-card-title>
+            </abp-card-header>
+            <abp-card-body>
+                <p class="text-muted">@L["SignUpDescription"]</p>
+
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.UserName" class="form-label">@L["UserName"]</label>
+                        <input asp-for="Input.UserName" class="form-control" autofocus autocomplete="username" />
+                        <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label">@L["EmailAddress"]</label>
+                        <input asp-for="Input.Email" class="form-control" type="email" autocomplete="email" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label">@L["Password"]</label>
+                        <input asp-for="Input.Password" class="form-control" type="password" autocomplete="new-password" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">@L["SignUp"]</button>
+                </form>
+
+                <hr />
+                <p class="mb-0 text-muted">
+                    @L["AlreadyHaveAnAccount"]
+                    <a href="~/Account/Login">@L["Login"]</a>
+                </p>
+            </abp-card-body>
+        </abp-card>
+    </div>
+</div>

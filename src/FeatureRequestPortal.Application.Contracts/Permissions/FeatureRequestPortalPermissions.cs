@@ -14,4 +14,12 @@ public static class FeatureRequestPortalPermissions
 
         public const string Delete = Default + ".Delete";
     }
+
+    public static class Users
+    {
+        public const string Default = GroupName + ".Users";
+
+        /// <summary>Lets an admin let a newly registered account into the portal.</summary>
+        public const string Approve = Default + ".Approve";
+    }
 }

@@ -9,4 +9,8 @@ public class FeatureRequestPortalMenus
 
     public const string NewFeatureRequest = Prefix + ".NewFeatureRequest";
 
+    public const string PendingRegistrations = Prefix + ".PendingRegistrations";
+
+    public const string SignUp = Prefix + ".SignUp";
+
 }

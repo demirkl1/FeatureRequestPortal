@@ -1,0 +1,67 @@
+@page
+@model FeatureRequestPortal.Web.Pages.Accounts.PendingRegistrationsModel
+@{
+    ViewBag.PageTitle = L["PendingRegistrations"].Value;
+}
+
+@section scripts {
+    <abp-script src="/Pages/FeatureRequests/Detail.js" />
+}
+
+<abp-card>
+    <abp-card-header>
+        <abp-card-title>@L["PendingRegistrations"]</abp-card-title>
+        <p class="text-muted mb-0">@L["PendingRegistrationsDescription"]</p>
+    </abp-card-header>
+    <abp-card-body>
+        @if (Model.PendingUsers.Count == 0)
+        {
+            <p class="text-muted mb-0">@L["NoPendingRegistrations"]</p>
+        }
+        else
+        {
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["UserName"]</th>
+                        <th>@L["EmailAddress"]</th>
+                        <th>@L["RegisteredAt"]</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.PendingUsers)
+                    {
+                        <tr>
+                            <td>@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td>@user.CreationTime.ToString("g")</td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <form method="post"
+                                          asp-page-handler="Approve"
+                                          asp-route-userId="@user.Id"
+                                          data-confirm-message="@L["AreYouSureToApprove", user.UserName].Value"
+                                          class="js-confirm-form">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fa fa-check me-1"></i> @L["Approve"]
+                                        </button>
+                                    </form>
+                                    <form method="post"
+                                          asp-page-handler="Reject"
+                                          asp-route-userId="@user.Id"
+                                          data-confirm-message="@L["AreYouSureToReject", user.UserName].Value"
+                                          class="js-confirm-form">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fa fa-times me-1"></i> @L["Reject"]
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </abp-card-body>
+</abp-card>

@@ -24,6 +24,16 @@ public class FeatureRequestPortalPermissionDefinitionProvider : PermissionDefini
             FeatureRequestPortalPermissions.FeatureRequests.Delete,
             L("Permission:FeatureRequests.Delete")
         );
+
+        var users = myGroup.AddPermission(
+            FeatureRequestPortalPermissions.Users.Default,
+            L("Permission:Users")
+        );
+
+        users.AddChild(
+            FeatureRequestPortalPermissions.Users.Approve,
+            L("Permission:Users.Approve")
+        );
     }
 
     private static LocalizableString L(string name)
