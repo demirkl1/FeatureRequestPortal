@@ -1,16 +1,25 @@
 # Feature Request Portal
 
-Kullanıcıların özellik talebi (feature request) açtığı, topluluğun bu talepleri oyladığı ve yorumladığı,
-admin'lerin ise talepleri durum bazında yönettiği bir portal.
+Kullanıcıların özellik talebi açtığı, topluluğun oyladığı ve yorumladığı, admin'lerin ise
+talepleri durum bazında yönettiği bir portal.
 
 Senaryo: Bir araba firması yeni modelinde hangi özellikleri yapacağını müşterilerine soruyor.
 Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata geçiriliyor.
 
-**Teknolojiler:** ABP Framework 10.6 · .NET 10 · MVC / Razor Pages (LeptonX Lite) · EF Core · PostgreSQL · Mapperly · xUnit
-**Ek arayüz:** React 19 · TypeScript · Vite (Razor Pages arayüzünün yanında, aynı HTTP API'yi tüketen ayrı bir SPA)
+**ABP Framework 10.6** · **.NET 10** · **MVC / Razor Pages** (LeptonX Lite) · **EF Core** ·
+**PostgreSQL** · Mapperly · xUnit
+Ek olarak: aynı HTTP API'yi tüketen bir **React 19 + TypeScript** arayüzü.
 
-Öne çıkanlar: rol bazlı görünürlük · her kullanıcıya tek oy · e-posta doğrulamalı
-ve **admin onaylı** kayıt · e-posta ile şifre sıfırlama · Türkçe/İngilizce · seçilebilir sayfa boyutu
+---
+
+## İçindekiler
+
+1. [Kurulum ve çalıştırma](#kurulum-ve-çalıştırma)
+2. [Ekran görüntüleri](#ekran-görüntüleri)
+3. [Mimari](#mimari)
+4. [Varsayımlar](#varsayımlar)
+5. [Zorlandığım noktalar](#zorlandığım-noktalar)
+6. [Öğrendiklerim](#öğrendiklerim)
 
 ---
 
@@ -19,7 +28,8 @@ ve **admin onaylı** kayıt · e-posta ile şifre sıfırlama · Türkçe/İngil
 ### Gereksinimler
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Docker (veya lokal bir PostgreSQL sunucusu)
+- Docker (ya da lokal bir PostgreSQL sunucusu)
+- Node.js 20+ (yalnızca opsiyonel React arayüzü için)
 
 ### 1. Veritabanını başlat
 
@@ -27,9 +37,9 @@ ve **admin onaylı** kayıt · e-posta ile şifre sıfırlama · Türkçe/İngil
 docker compose up -d
 ```
 
-PostgreSQL, host'ta **5433** portuna map edilir (5432 çoğu makinede lokal bir PostgreSQL tarafından
-kullanıldığı için). Lokal bir PostgreSQL kullanacaksanız `src/FeatureRequestPortal.Web/appsettings.json`
-ve `src/FeatureRequestPortal.DbMigrator/appsettings.json` içindeki connection string'i güncelleyin.
+PostgreSQL host'ta **5433** portuna map edilir; 5432 çoğu geliştirme makinesinde zaten dolu oluyor.
+Kendi PostgreSQL'inizi kullanacaksanız `src/FeatureRequestPortal.Web/appsettings.json` ve
+`src/FeatureRequestPortal.DbMigrator/appsettings.json` içindeki connection string'i güncelleyin.
 
 ### 2. Şemayı oluştur ve veriyi yükle
 
@@ -38,11 +48,11 @@ cd src/FeatureRequestPortal.DbMigrator
 dotnet run
 ```
 
-Bu adım migration'ları uygular, ABP'nin varsayılan verisini (admin kullanıcısı, roller, permission'lar)
-ve demo amaçlı **20 örnek özellik talebini** yükler.
+Migration'ları uygular; ABP'nin varsayılan verisini (admin kullanıcısı, roller, permission'lar),
+demo amaçlı **20 örnek talebi** ve bir normal kullanıcı hesabını yükler.
 
-> `DbMigrator` ve `Web` projeleri `appsettings.json` dosyalarını çalışma dizininden okur;
-> bu yüzden komutları ilgili proje klasörünün içinden çalıştırın.
+> ⚠️ `DbMigrator` ve `Web` projeleri `appsettings.json` dosyasını **çalışma dizininden** okur.
+> Komutları repo kökünden değil, ilgili proje klasörünün içinden çalıştırın.
 
 ### 3. Uygulamayı çalıştır
 
@@ -51,15 +61,20 @@ cd src/FeatureRequestPortal.Web
 dotnet run
 ```
 
-Uygulama <https://localhost:44372> adresinde açılır.
-İlk kez çalıştırıyorsanız sertifika uyarısı almamak için: `dotnet dev-certs https --trust`
+<https://localhost:44372> adresinde açılır.
+İlk çalıştırmada sertifika uyarısı almamak için: `dotnet dev-certs https --trust`
 
-**Varsayılan admin hesabı:** `admin` / `1q2w3E*`
+**Hazır hesaplar**
 
-### 4. (Opsiyonel) React SPA'yı çalıştır
+| Rol | Kullanıcı adı | Parola |
+|---|---|---|
+| Admin | `admin` | `1q2w3E*` |
+| Giriş yapmış kullanıcı | `demo` | `1q2w3E*` |
+| Ziyaretçi | — | giriş yapmayın |
 
-Razor Pages arayüzünün yanına, aynı backend'i HTTP API üzerinden tüketen ayrı bir
-**React + TypeScript** arayüzü eklendi. Razor tarafına dokunulmadı; ikisi yan yana çalışır.
+Swagger: <https://localhost:44372/swagger>
+
+### 4. (Opsiyonel) React arayüzünü çalıştır
 
 ```bash
 cd src/FeatureRequestPortal.SPA
@@ -67,18 +82,19 @@ npm install
 npm run dev
 ```
 
-SPA <http://localhost:5173> adresinde açılır. **Backend'in ayrıca çalışıyor olması gerekir**
-(adım 3), çünkü Vite dev server'ı `/api` ve `/connect` isteklerini `https://localhost:44372`
-adresine proxy'ler. Proxy sayesinde tarayıcı self-signed sertifikayla hiç muhatap olmaz.
+<http://localhost:5173> adresinde açılır. **Backend'in ayrıca çalışıyor olması gerekir** (adım 3),
+çünkü Vite dev server'ı `/api` ve `/connect` isteklerini `https://localhost:44372` adresine
+proxy'ler. Proxy sayesinde tarayıcı self-signed sertifikayla hiç muhatap olmaz.
 
-### 5. E-posta gönderimi (kayıt ve şifre sıfırlama için)
+### 5. (Opsiyonel) E-posta gönderimi
 
 Kayıt doğrulama kodu, hesap onay bildirimi ve şifre sıfırlama linki e-posta ile gider.
-**SMTP ayarlanmazsa uygulama çalışmayı sürdürür:** mailler `Logs/emails/` altına dosya olarak
-yazılır ve konsola bir uyarı düşer. Böylece repoyu klonlayan biri hiçbir posta kutusu bilgisine
-ihtiyaç duymadan tüm akışı deneyebilir — doğrulama kodunu ve sıfırlama linkini o dosyalardan okur.
 
-Gerçekten göndermek için (Gmail örneği — hesapta 2FA açık olmalı ve normal parola değil
+**SMTP ayarlamazsanız uygulama çalışmaya devam eder:** mailler `Logs/emails/` klasörüne dosya
+olarak yazılır ve konsola bir uyarı düşer. Böylece repoyu klonlayan biri hiçbir posta kutusu
+bilgisine ihtiyaç duymadan tüm akışı deneyebilir — doğrulama kodunu o dosyadan okur.
+
+Gerçekten göndermek için (Gmail örneği; hesapta 2FA açık olmalı ve normal parola değil
 **16 haneli uygulama şifresi** gerekir):
 
 ```bash
@@ -89,51 +105,55 @@ dotnet user-secrets set "Settings:Abp.Mailing.Smtp.Password" "uygulama-sifresi"
 dotnet user-secrets set "Settings:Abp.Mailing.DefaultFromAddress" "adresiniz@gmail.com"
 ```
 
-Sırlar **user secrets**'ta tutulur, repoya girmez. `appsettings.secrets.json` git tarafından
-takip edildiği için oraya parola yazmayın.
+Sırlar **user secrets**'ta tutulur, repoya girmez.
 
 ### Testler
 
 ```bash
-dotnet test                                    # 28 test (Domain 10, EF Core 17, Web 1)
-cd src/FeatureRequestPortal.SPA && npx tsc -b   # SPA tip kontrolü
+dotnet test                                   # 28 test
+cd src/FeatureRequestPortal.SPA && npx tsc -b  # SPA tip kontrolü
 ```
 
-> `npx tsc --noEmit` bu projede **hiçbir şeyi kontrol etmez**: kökteki `tsconfig.json`
-> solution-style (`files: []` + `references`), dolayısıyla sessizce başarılı olur.
-> Gerçek kontrol `tsc -b`'dir, `npm run build` de onu çalıştırır.
+| Proje | Adet | Tür |
+|---|---|---|
+| `Domain.Tests` | 10 | Saf unit test, veritabanı yok |
+| `EntityFrameworkCore.Tests` | 17 | Entegrasyon, SQLite in-memory |
+| `Web.Tests` | 1 | Smoke |
+
+> SPA için `npx tsc --noEmit` **hiçbir şeyi kontrol etmez** — kök `tsconfig.json` solution-style
+> olduğu için sessizce başarılı olur. Doğru komut `tsc -b`, `npm run build` de onu çalıştırır.
 
 ---
 
 ## Ekran görüntüleri
 
-### Ana sayfa — liste (anonim ziyaretçi)
+### Ana sayfa — ziyaretçi
 
-Sayfalama (15 satır), oy sayısına göre sıralama ve durum filtresi. Anonim ziyaretçi yalnızca
-`Approved` kayıtları görür.
+Sayfalama (15 satır), oy sayısı kolonuna tıklanarak sıralama, durum filtresi.
+Ziyaretçi yalnızca `Approved` kayıtları görür; statü filtresi ona hiç gösterilmez.
 
-![Liste sayfası](docs/screenshots/01-list-anonymous.jpg)
+![Liste — ziyaretçi](docs/screenshots/01-list-anonymous.jpg)
 
-### Detay sayfası (anonim ziyaretçi)
+### Detay — ziyaretçi
 
-Oy verme ve yorum yazma butonları giriş bağlantısına dönüşür.
+Oy verme ve yorum yazma alanları giriş bağlantısına dönüşür.
 
-![Detay sayfası - anonim](docs/screenshots/02-detail-anonymous.jpg)
+![Detay — ziyaretçi](docs/screenshots/02-detail-anonymous.jpg)
 
-### Liste — giriş yapmış kullanıcı
+### Ana sayfa — giriş yapmış kullanıcı
 
-Giriş yapan kullanıcı tüm durumları görür (Beklemede, Reddedildi, İptal edildi...).
+Giriş yapan kullanıcı tüm statüleri görür ve filtreleyebilir.
 
-![Liste sayfası - giriş yapmış](docs/screenshots/03-list-authenticated.jpg)
+![Liste — giriş yapmış](docs/screenshots/03-list-authenticated.jpg)
 
-### Detay sayfası (admin)
+### Detay — admin
 
-Oy verildiği için buton kilitlenmiş, yorum yazarı ve tarihi görünüyor; admin ek olarak
-durum değiştirme ve silme yapabiliyor.
+Oy verildiği için buton kilitli; yorumlarda yazar ve tarih görünüyor. Admin ek olarak statü
+değiştirebiliyor ve talebi silebiliyor.
 
-![Detay sayfası - admin](docs/screenshots/04-detail-admin.jpg)
+![Detay — admin](docs/screenshots/04-detail-admin.jpg)
 
-### Yeni özellik talebi
+### Yeni talep
 
 ![Yeni talep](docs/screenshots/05-create.jpg)
 
@@ -141,325 +161,257 @@ durum değiştirme ve silme yapabiliyor.
 
 ![Silme onayı](docs/screenshots/06-delete-confirmation.jpg)
 
----
+### Kayıt akışı
 
-## Ekran görüntüleri — React SPA
+Kayıt → e-postaya gelen 6 haneli kod → admin onayı.
 
-Aynı backend'in React + TypeScript arayüzü. Açık/koyu tema, tasarım token'ları,
-monospace teknik metadata ve erişilebilir bileşenler.
+| Kayıt | Kod doğrulama | Onay bekleniyor |
+|---|---|---|
+| ![Kayıt](docs/screenshots-accounts/01-signup.jpg) | ![Kod](docs/screenshots-accounts/02-verify-code.jpg) | ![Bekliyor](docs/screenshots-accounts/04-pending-approval.jpg) |
 
-### Liste — anonim ziyaretçi (açık tema)
+Yanlış kod reddedilir; admin kuyruğunda yalnızca e-postasını doğrulamış hesaplar listelenir.
 
-Anonim kullanıcı yalnızca `Approved` talepleri görür.
+| Yanlış kod | Admin onay kuyruğu | Şifre sıfırlama |
+|---|---|---|
+| ![Yanlış kod](docs/screenshots-accounts/03-wrong-code.jpg) | ![Kuyruk](docs/screenshots-accounts/05-admin-queue.jpg) | ![Sıfırlama](docs/screenshots-accounts/07-reset-password.jpg) |
 
-![SPA liste anonim](docs/screenshots-spa/01-spa-list-anonymous.jpg)
+### React arayüzü — ekranlar
 
-### Detay — anonim ziyaretçi
+Aynı backend'in React + TypeScript arayüzü: tasarım token'ları, açık/koyu tema, Türkçe/İngilizce.
 
-Oy butonu devre dışı, gerekçesi yazılı; yorum formu yerine giriş çağrısı var.
+| Liste (açık tema) | Liste — admin (koyu tema) |
+|---|---|
+| ![SPA liste](docs/screenshots-spa/01-spa-list-anonymous.jpg) | ![SPA admin](docs/screenshots-spa/04-spa-list-admin-dark.jpg) |
 
-![SPA detay anonim](docs/screenshots-spa/02-spa-detail-anonymous.jpg)
+| Detay — admin | Mükerrer oy engeli |
+|---|---|
+| ![SPA detay](docs/screenshots-spa/06-spa-detail-admin-dark.jpg) | ![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg) |
 
-### Giriş ekranı
-
-![SPA giriş](docs/screenshots-spa/03-spa-login.jpg)
-
-### Liste — admin (koyu tema)
-
-Admin tüm statüleri görür; 6 statünün her biri ayrı rozetle gösterilir.
-
-![SPA liste admin](docs/screenshots-spa/04-spa-list-admin-dark.jpg)
-
-### Yeni talep
-
-Canlı karakter sayacı ve alan bazlı doğrulama.
-
-![SPA yeni talep](docs/screenshots-spa/05-spa-create.jpg)
-
-### Detay — admin
-
-Oy verilmiş durum, yorumlar, 100 karakter kuralı ve admin kontrolleri (statü + silme).
-
-![SPA detay admin](docs/screenshots-spa/06-spa-detail-admin-dark.jpg)
-
-### Silme onayı
-
-Native `<dialog>` ile focus-trap'li onay.
-
-![SPA silme onayı](docs/screenshots-spa/07-spa-delete-dialog.jpg)
-
-### Mükerrer oy engeli
-
-Domain'den gelen `FeatureRequestPortal:AlreadyVoted` hatası toast olarak gösterilir.
-
-![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg)
-
-### Sayfa boyutu
-
-![SPA sayfa boyutu](docs/screenshots-spa/12-spa-page-size.jpg)
-
-### Türkçe
-
-![SPA Türkçe](docs/screenshots-spa/11-spa-turkish.jpg)
-
-### Mobil (380px)
-
-![SPA mobil](docs/screenshots-spa/09-spa-mobile.jpg)
+| Türkçe | Mobil (380px) |
+|---|---|
+| ![SPA Türkçe](docs/screenshots-spa/11-spa-turkish.jpg) | ![SPA mobil](docs/screenshots-spa/09-spa-mobile.jpg) |
 
 ---
-
-## Ekran görüntüleri — kayıt, doğrulama ve onay
-
-### 1. Kayıt
-
-![Kayıt](docs/screenshots-accounts/01-signup.jpg)
-
-### 2. E-posta doğrulama kodu
-
-![Doğrulama kodu](docs/screenshots-accounts/02-verify-code.jpg)
-
-### 3. Yanlış kod reddediliyor
-
-![Yanlış kod](docs/screenshots-accounts/03-wrong-code.jpg)
-
-### 4. Onay bekleniyor
-
-![Onay bekleniyor](docs/screenshots-accounts/04-pending-approval.jpg)
-
-### 5. Admin onay kuyruğu
-
-Yalnızca e-postasını doğrulamış hesaplar listelenir.
-
-![Admin kuyruğu](docs/screenshots-accounts/05-admin-queue.jpg)
-
-### 6. Onay teyidi
-
-![Onay teyidi](docs/screenshots-accounts/06-approve-confirm.jpg)
-
-### 7. Şifre sıfırlama
-
-E-postadaki linkle ulaşılan sayfa.
-
-![Şifre sıfırlama](docs/screenshots-accounts/07-reset-password.jpg)
 
 ## Mimari
 
-Proje ABP'nin katmanlı (DDD) yapısını kullanır:
+ABP'nin katmanlı (DDD) yapısı:
 
 | Katman | İçerik |
 |---|---|
 | `Domain.Shared` | `FeatureRequestStatus` enum'ı, `FeatureRequestConsts` (uzunluk limitleri), hata kodları, localization |
 | `Domain` | `FeatureRequest` aggregate root'u, `Vote` ve `Comment` child entity'leri, `IFeatureRequestRepository`, seed |
 | `EntityFrameworkCore` | DbContext mapping'leri, `EfCoreFeatureRequestRepository`, migration'lar |
-| `Application.Contracts` | DTO'lar, `IFeatureRequestAppService`, permission tanımları |
-| `Application` | `FeatureRequestAppService`, Mapperly mapper'ları |
-| `Web` | Razor Pages (liste / detay / oluşturma / kayıt / onay), menü, auto API controller'lar, CORS, e-posta gönderimi |
-| `SPA` | React + TypeScript arayüz (ABP katmanı değil; ayrı bir Vite projesi) |
+| `Application.Contracts` | DTO'lar, app service interface'leri, permission tanımları |
+| `Application` | App service implementasyonları, Mapperly mapper'ları |
+| `HttpApi` | Auto API controller'lar buradan expose edilir |
+| `Web` | Razor Pages, menü, CORS, Swagger, e-posta gönderimi |
+| `SPA` | React + TypeScript arayüz (ABP katmanı değil, ayrı bir Vite projesi) |
 
-### Kayıt, e-posta doğrulama ve admin onayı
-
-ABP'nin hazır kayıt sayfası kullanıcıyı kayıt olur olmaz **içeri alıyor**. Şartname onay
-gerektirdiği için o sayfa kapatıldı (`Abp.Account.IsSelfRegistrationEnabled = false`) ve akış
-`Pages/Accounts/` altında yeniden yazıldı. Bir hesap iki kapıdan geçmeden giriş yapamaz:
-
-```
-Kayıt  →  hesap IsActive=false olarak yaratılır, 6 haneli kod e-postalanır
-       →  kullanıcı kodu girer            → EmailConfirmed=true
-       →  admin onay kuyruğunda görünür   → admin onaylar → IsActive=true + bilgilendirme e-postası
-       →  artık giriş yapabilir
-```
-
-- **Kod nasıl üretiliyor?** ASP.NET Core Identity'nin TOTP tabanlı e-posta token sağlayıcısı ile
-  (`GenerateUserTokenAsync` / `VerifyUserTokenAsync`). Kodun süresi kendi içinde taşındığı için
-  yanına ayrı bir tablo, entity ya da migration eklemek gerekmedi.
-- **Girişi ne engelliyor?** `IsActive = false`. ABP'nin sign-in manager'ı bu bayrağı zaten kontrol
-  ediyor, yani engel tek bir yerde ve UI'dan bağımsız.
-- **Kuyrukta kim var?** Yalnızca `EmailConfirmed && !IsActive` olanlar. E-postasını doğrulamamış
-  bir kayıt henüz bir başvuru sayılmadığı için admin'in önüne hiç düşmüyor.
-- **Reddetme** hesabı siler, ama yalnızca hâlâ pasifse — aktif bir hesap bir reddet tıklamasıyla
-  silinemez.
-- Yetki: `FeatureRequestPortal.Users.Approve`.
-
-### E-posta gönderimi
-
-`ISmtpEmailSenderConfiguration` değiştirildi. Sebebi: ABP, SMTP parolasını **şifreli saklanmış**
-varsayıp okurken çözmeye çalışıyor; bizimki user secrets'ta düz metin olduğu için çözme işlemi onu
-bozardı. `GetPasswordAsync` virtual olmadığından değeri veren sınıfın komple değiştirilmesi gerekti.
-Host, port, SSL ve gönderen adresi hâlâ ABP'nin normal ayar hattından geliyor.
-
-SMTP tanımlı değilse `FileEmailSender` devreye girer ve mailleri `Logs/emails/` altına yazar.
-Sessizce yutmak yerine konsola **uyarı** düşer — hiçbir şey göndermeyen bir sender'ı production'da
-fark etmek can sıkıcı olur.
-
-### React SPA
-
-Razor Pages arayüzü **olduğu gibi korundu**; SPA onun yerine geçmez, yanında durur ve
-ABP'nin otomatik ürettiği HTTP API'yi tüketir.
-
-```
-src/FeatureRequestPortal.SPA/src/
-├── api/         http.ts (fetch sarmalayıcı), auth.ts, featureRequests.ts, types.ts
-├── auth/        AuthContext — oturum, currentUser, grantedPolicies
-├── components/  StatusBadge, VoteButton, ConfirmDialog, Toast, alan bileşenleri…
-├── pages/       ListPage, DetailPage, CreatePage, LoginPage
-└── styles/      tokens.css (tasarım token'ları) + global.css
-```
-
-- **Kimlik doğrulama:** OpenIddict `password` grant (`FeatureRequestPortal_SPA` client'ı).
-  Böylece giriş ekranı da SPA'nın kendi tasarımı içinde kalıyor; LeptonX login sayfasına
-  yönlendirme olmuyor. 401 alındığında bir kez `refresh_token` denenip istek tekrarlanır.
-- **Yetki:** `/api/abp/application-configuration` çağrısından `currentUser` ve
-  `grantedPolicies` okunur; admin kontrolleri `ChangeStatus` / `Delete` policy'lerine bağlıdır.
-- **Tasarım:** Tüm renk / boşluk / tipografi değerleri `tokens.css` içinde CSS custom
-  property olarak tanımlıdır. Koyu tema hem `prefers-color-scheme` hem de `data-theme`
-  üzerinden çalışır, kullanıcı tercihi `localStorage`'da saklanır.
-- **Dil:** `src/i18n/` altında elle yazılmış küçük bir çeviri katmanı var; `en` ve `tr`
-  sözlüklerinin ikisi de `Record<TranslationKey, string>` tipinde, dolayısıyla birinde eksik
-  kalan anahtar **derleme hatası** olur. Tarihler `Intl.DateTimeFormat` ile dile göre biçimlenir.
-
-### Sayfa boyutu
-
-Kullanıcı 15 / 20 / 30 / 50 arasından seçer. Sunucu bu listeyi bir whitelist olarak uygular
-(`NormalizePageSize`): listede olmayan bir `MaxResultCount` sessizce 15'e düşer. Aksi hâlde
-`MaxResultCount=100000` ile liste endpoint'i tüm tabloyu döken bir uca dönüşürdü.
+**Kritik referans kuralı:** `Application.Contracts` yalnızca `Domain.Shared`'ı görür, `Domain`'i
+görmez. Sözleşme paketi istemciye dağıtılabilir olmalı; entity'leri ve iş kurallarını sürüklememeli.
+Bu yüzden DTO'ların kullandığı her şey — statü enum'ı, uzunluk sabitleri — `Domain.Shared`'da.
 
 ### Domain modeli
 
 ```
-FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
+FeatureRequest : FullAuditedAggregateRoot<Guid>        → soft-delete
 ├── Title (10–200, zorunlu), Description (max 2000)
 ├── Status (Pending, Approved, Rejected, Planned, Completed, Cancelled)
 ├── VoteCount (private set — yalnızca AddVote artırır)
-├── Votes    → Vote    (CreationAuditedEntity<Guid>)
-└── Comments → Comment (CreationAuditedEntity<Guid>, Text 100–2000)
+├── Votes    → Vote    : CreationAuditedEntity<Guid>
+└── Comments → Comment : CreationAuditedEntity<Guid>   (Text: 100–2000)
 ```
 
-### Aldığım tasarım kararları
+Şartname `AggregateRoot` diyor; admin silmesi soft-delete olacağı için `FullAuditedAggregateRoot`
+kullandım — aksi halde `IsDeleted` alanı hiç olmazdı.
 
-- **`VoteCount` manuel güncellenmez.** Sadece `FeatureRequest.AddVote()` içinde artar; property `private set`
-  olduğu için aggregate dışından değiştirilemez. Böylece sayaç ile `Votes` koleksiyonu asla ayrışamaz.
-- **Mükerrer oy iki katmanda engellenir.** Domain'de `AddVote`, kullanıcının daha önce oy verip vermediğini
-  kontrol edip `BusinessException("FeatureRequestPortal:AlreadyVoted")` fırlatır. Ek olarak `AppVotes`
-  tablosunda `(FeatureRequestId, CreatorId)` üzerinde **unique index** vardır; eşzamanlı iki istek
-  domain kontrolünü atlatsa bile veritabanı reddeder.
-- **Uzunluk kuralları tek yerde.** `FeatureRequestConsts` hem entity doğrulamasını hem DTO'lardaki
-  `[StringLength]` attribute'larını besler. Bu sabitler `Domain.Shared`'dadır, çünkü `Application.Contracts`
-  projesi `Domain`'i referans alamaz.
-- **Yetkilendirme.** Talep oluşturma / oy verme / yorum yapma yalnızca `[Authorize]` ister (giriş yapmış
-  herkes). Durum değiştirme ve silme ise ABP permission'larıdır
-  (`FeatureRequestPortal.FeatureRequests.ChangeStatus` ve `.Delete`) ve DbMigrator ilk çalıştığında admin
-  rolüne otomatik atanır. Ödevde belirtildiği gibi yeni bir yetki sistemi yazılmadı, ABP'ninki kullanıldı.
-- **Silme soft-delete'tir.** `FeatureRequest` bir `FullAuditedAggregateRoot` olduğu için silinen kayıt
-  veritabanında `IsDeleted = true` olarak kalır ve ABP'nin data filter'ı sayesinde sorgulara girmez.
-- **Sıralama ifadesi normalize edilir.** Liste sorgusu dinamik LINQ ile sıralandığı için query string'den
-  gelen `Sorting` değeri doğrudan kullanılmaz; yalnızca arayüzün sunduğu iki sıralamaya
-  (`CreationTime`, `VoteCount`) indirgenir.
-- **Yorum sahiplerinin isimleri tek sorguda çözülür.** Detay sayfasında yorum başına ayrı kullanıcı
-  sorgusu (N+1) atmak yerine `CreatorId` seti toplanıp identity modülünden tek seferde çekilir.
+`Vote` ve `Comment` constructor'ları `internal`; yalnızca `FeatureRequest.AddVote()` /
+`AddComment()` üzerinden yaratılabiliyorlar. Repository de tek: `IFeatureRequestRepository`.
+Tutarlılık sınırı aggregate'in kendisi.
 
-### Testler
+### Öne çıkan tasarım kararları
 
-| Proje | Kapsam |
-|---|---|
-| `Domain.Tests` | Mükerrer oy reddi, oy sayacı, başlık ve yorum uzunluk kuralları (10 test) |
-| `EntityFrameworkCore.Tests` | Uygulama servisi uçtan uca: sayfalama, sıralama, durum filtresi, `Pending` olarak oluşturma, mükerrer oy, yorum doğrulaması, durum değişimi, soft-delete (15 test) |
+**Mükerrer oy iki katmanda engelleniyor.** Domain'de `AddVote()` içinde `HasVoted` kontrolü ve
+`AlreadyVoted` iş hatası; veritabanında `AppVotes` üzerinde `(FeatureRequestId, CreatorId)` unique
+index. Domain kontrolü okunabilir ve lokalize bir hata verir, ama iki eşzamanlı istek ikisi de
+kontrolden geçebilir — o noktada unique index son sözü söyler.
 
-## Varsayımlar
+**`VoteCount` bilinçli olarak denormalize.** Liste oy sayısına göre sıralanıp sayfalandığı için
+kolon olarak tutuluyor ve index'leniyor; `Votes.Count` her sıralamada join + group by gerektirirdi.
+Tutarlılık `private set` ile korunuyor: sadece `AddVote()` içinde, `Votes.Add()` ile aynı metotta
+artıyor.
 
-Ödev metninde açık olmayan noktalarda şu kararları verdim:
+**Kullanıcıdan gelen hiçbir değer doğrudan sorguya girmiyor.** Repository dinamik sıralama için
+`System.Linq.Dynamic.Core` kullanıyor, yani string'den LINQ ifadesi üretiliyor. Bu string query
+string'den gelseydi `Sorting=CreatorId` gibi bir istek sıralama üzerinden veri sızdırabilirdi.
+`NormalizeSorting` bir whitelist: çıktı yalnızca `VoteCount asc/desc` veya `CreationTime asc/desc`
+olabiliyor. Aynı yaklaşım sayfa boyutunda da var (`NormalizePageSize`).
 
-1. **Görünürlük:** Anonim ziyaretçi yalnızca `Approved` kayıtları görür (metinde belirtildiği gibi).
-   Giriş yapmış kullanıcılar **tüm durumları** görür — böylece kendi açtıkları `Pending` talebi ve
-   topluluğun bekleyen taleplerini görüp oylayabiliyorlar.
-2. **Yorum minimum uzunluğu 100 karakter** olarak, metinde yazdığı gibi uygulandı. Kural
-   `FeatureRequestConsts.MinCommentTextLength` sabitinden tek noktadan yönetiliyor.
-3. **Ana sayfa doğrudan liste sayfasıdır** (`/`); şablonun karşılama sayfası kaldırıldı.
-4. **Liste kolonları:** Ödevde istenen Başlık / Oy / Durum kolonlarına ek olarak **Oluşturulma** kolonu
-   eklendi. Varsayılan sıralama oluşturulma tarihine göre olduğu için bu kolonun görünmesi sıralamayı
-   anlaşılır kılıyor ve kullanıcı oy sıralamasından geri dönebiliyor.
-5. **PostgreSQL portu 5433.** Geliştirme makinelerinde 5432 sıklıkla dolu olduğu için Docker Compose
-   bu porta map ediyor.
-6. **Statü geçişlerinde kural yok.** Admin herhangi bir statüden herhangi birine geçebiliyor;
-   şartnamede geçiş kuralı tanımlı değil ve admin'in yanlışlıkla verdiği kararı geri alabilmesi
-   pratikte daha değerli görünüyor. Gerekseydi `FeatureRequest.SetStatus` içine bir state machine
-   konurdu.
-7. **Doğrulama kodu 6 hane ve süreli.** Identity'nin TOTP tabanlı sağlayıcısı kullanıldığı için
-   uzunluk bir tercih değil, sağlayıcının çıktısı; kod tekrar istenebiliyor.
-8. **Onaylanmayan hesap silinmiyor, bekliyor.** Reddetme ayrı bir aksiyon ve yalnızca hâlâ pasif
-   hesaplarda çalışıyor.
+**Ziyaretçi filtresi sorgunun içinde.** `onlyApproved = !CurrentUser.IsAuthenticated` bayrağı
+repository'ye geçiyor ve `WhereIf` ile SQL'e giriyor. Bellekte filtreleseydim hem gereksiz veri
+çekerdim hem de `totalCount` yanlış çıkacağı için sayfalama bozulurdu. Ziyaretçi onaylanmamış bir
+kaydın id'sini tahmin ederse 403 değil **404** alıyor — 403 kaydın varlığını sızdırırdı.
 
-## Zorlandığım noktalar
+**Yorum yazarları tek sorguda çözülüyor.** `CreatorId`'ler toplanıp tek `GetListAsync` ile
+çekiliyor; yorum başına sorgu atsaydım 20 yorumlu bir talepte 20 ekstra sorgu olurdu. Kullanıcı adı
+`Comment` aggregate'ine ait olmadığı için entity'de tutulmuyor, okuma anında çözülüyor.
 
-- **Şablon AutoMapper değil Mapperly kullanıyor.** ABP 10.6 startup template'i `Volo.Abp.Mapperly` ile
-  geliyor, dolayısıyla book-store tutorial'ındaki `CreateMap<>` yaklaşımı burada çalışmıyor. Doğru kalıbı
-  bulmak birkaç deneme aldı: mapper sınıfının `[Mapper]` ile işaretlenip
-  **`MapperBase<TSource, TDestination>`** sınıfından türemesi gerekiyor. `IAbpMapperlyMapper<,>` arayüzünü
-  doğrudan implemente etmek derleniyor, ama çalışma zamanında `AddMapperlyObjectMapper` tarafından
-  bulunmuyor ve "No object mapping was found" hatası alınıyor. Bunu ancak entegrasyon testlerini
-  yazdıktan sonra fark ettim.
-- **`CreatorId`'nin setter'ı `protected`.** Mükerrer oy kontrolü için oyun sahibinin kayıt anında bilinmesi
-  gerekiyor, ama `CreationAuditedEntity.CreatorId` aggregate dışından atanamıyor (CS0272). Çözüm, değeri
-  `Vote` entity'sinin kendi constructor'ından atamak oldu.
-- **Anonim erişim ile yetkilendirmenin dengesi.** Uygulama servisi sınıf düzeyinde `[Authorize]`, liste ve
-  detay metotları ise `[AllowAnonymous]`. Anonim bir kullanıcı `Approved` olmayan bir kaydın id'sini
-  tahmin ederse, kaydın varlığını sızdırmamak için 403 yerine `EntityNotFoundException` dönülüyor.
-- **`IHtmlLocalizer.Value` metni formatlamıyor.** Silme onayı mesajını Razor içinde
-  `@L["AreYouSureToDelete", Title].Value` ile kurmuştum; ekranda `{0}` yer tutucusu ham haliyle
-  görünüyordu. `IHtmlLocalizer` formatlamayı ancak render sırasında yapıyor, `.Value` kaynak metnini
-  olduğu gibi döndürüyor. Mesajı `IStringLocalizer` kullanan PageModel'de kurmak sorunu çözdü.
-  Bunu ancak uygulamayı tarayıcıda gerçekten çalıştırınca fark ettim; testler bu tür görünüm
-  hatalarını yakalamıyor.
-- **Yapılandırmanın çalışma dizinine bağlı olması.** `dotnet run --project ...` şeklinde repo kökünden
-  çalıştırıldığında `appsettings.json` okunmuyor ve "ConnectionString property has not been initialized"
-  hatası alınıyor; komutları proje klasörünün içinden çalıştırmak gerekiyor.
-- **macOS'ta `/connect/token` isteğinin sunucuyu tamamen kilitlemesi.** SPA'yı bağlarken ilk giriş
-  denemesinde istek hiç dönmedi ve ardından sunucu *bütün* isteklere cevap vermez oldu; log,
-  token üretiminin ortasında kesiliyordu. `dotnet-stack` ile alınan managed stack dump kilidin yerini
-  netleştirdi: thread `AppleCryptoNative_SecKeyCreateSignature` içinde bekliyordu. Sebebi, ABP'nin
-  development'ta kullandığı imzalama sertifikasının macOS'ta **login Keychain**'de durması —
-  JWT imzalamak Keychain onayı gerektiriyor ve GUI oturumuna bağlı olmayan bir process (arka planda
-  başlatılmış `dotnet run`, CI) bu onayı hiç alamadığı için sonsuza kadar bekliyor. Development'ta
-  `AddEphemeralEncryptionKey()` / `AddEphemeralSigningKey()` kullanarak anahtarları bellekte tutmak
-  sorunu çözdü. Razor Pages arayüzü cookie authentication kullandığı için bu kod yoluna hiç girmiyordu;
-  hata ancak SPA token endpoint'ini kullanmaya başlayınca ortaya çıktı.
-- **Proxy arkasında ABP'nin antiforgery kontrolü.** SPA'dan yapılan `POST`'lar 400 dönüyordu, aynı istek
-  `curl` ile 200 dönüyordu. Fark şuydu: Vite proxy'si sayesinde SPA backend ile **aynı origin**'de
-  olduğu için tarayıcı ABP'nin antiforgery cookie'sini her istekte geri gönderiyor, ABP de isteği
-  cookie ile doğrulanmış sayıp `RequestVerificationToken` header'ı bekliyor; `curl`'de cookie
-  olmadığı için bu kontrol hiç tetiklenmiyordu. Çözüm, ABP'nin okunabilir `XSRF-TOKEN` cookie'sini
-  okuyup güvenli olmayan HTTP metotlarında bu header ile geri göndermek oldu.
-- **Sonradan eklenen permission mevcut veritabanına düşmüyor.** `Users.Approve` yetkisini ekleyip
-  admin ile giriş yaptığımda yeni admin sayfasına erişemedim. Sebep: ABP tüm yetkileri admin rolüne
-  **yalnızca o rolü ilk yarattığı anda** veriyor; sonradan tanımlanan bir permission mevcut bir
-  veritabanına hiç ulaşmıyor. Sıfır veritabanında sorun görünmüyor, bu yüzden fark etmesi kolay
-  değil. `AdminPermissionDataSeedContributor` ile yetkiyi idempotent şekilde vererek çözdüm —
-  güncellenen veritabanlarını onarıyor, yeni kurulumları etkilemiyor.
-- **`BusinessException.Message` lokalize metni taşımıyor.** Yanlış doğrulama kodunda ekranda hiçbir
-  hata görünmüyordu. ABP hata kodunu mesaja ancak exception'ı HTTP cevabına çevirirken dönüştürüyor;
-  bir Razor sayfasında `catch` edip `exception.Message` yazdırdığınızda elinizde kod var, cümle yok.
-  Mesajı `IStringLocalizer`'dan doğrudan almak gerekti.
-- **`npx tsc --noEmit` hiçbir şeyi kontrol etmiyordu.** SPA'nın kök `tsconfig.json` dosyası
-  solution-style (`files: []` + `references`) olduğu için bu komut sessizce başarılı oluyor —
-  sözlüğü bilerek bozduğumda bile "temiz" dedi. Gerçek kontrol `tsc -b`; `npm run build` de onu
-  çalıştırıyor. Yeşil bir çıktının doğrulama anlamına gelmediğinin iyi bir örneği.
+### Yetkilendirme
 
-## Öğrendiklerim
+App service sınıf düzeyinde `[Authorize]`; liste ve detay `[AllowAnonymous]`. Statü değiştirme ve
+silme ABP permission'larına bağlı (`FeatureRequests.ChangeStatus`, `FeatureRequests.Delete`).
+Talep açma, oy verme ve yorum yapma için ayrı permission tanımlamadım: bunlar **her** giriş yapmış
+kullanıcıda var, permission yapmak hiç kapatılmayacak bir anahtar tanımlamak olurdu.
 
-- Bir aggregate root'un davranışını (oy ekleme, yorum ekleme) entity'nin içine koymanın, sayaç gibi
-  türetilmiş alanları tutarlı tutmayı ne kadar kolaylaştırdığını.
-- Katman referans kurallarının tasarımı nasıl yönlendirdiğini: `Application.Contracts` `Domain`'i
-  göremediği için enum ve sabitlerin `Domain.Shared`'a taşınması gerekti.
-- ABP permission sisteminin custom permission'ları DbMigrator ilk çalıştığında admin rolüne otomatik
-  atadığını; ayrı bir yetki altyapısı yazmaya gerek olmadığını.
-- Bir iş kuralını hem domain'de hem de veritabanı kısıtıyla (unique index) korumanın, yarış koşullarına
-  karşı neden değerli olduğunu.
-- ABP'nin DataTables entegrasyonuyla sunucu taraflı sayfalama/sıralamanın, uygulama servisindeki
-  `PagedAndSortedResultRequestDto` ile ne kadar az kodla bağlandığını.
+### React arayüzü
+
+Razor Pages arayüzü olduğu gibi duruyor; SPA onun yerine geçmiyor, yanında duruyor ve ABP'nin
+otomatik ürettiği HTTP API'yi tüketiyor. Bu aynı zamanda API'nin gerçekten istemci-agnostik
+olduğunun kanıtı.
+
+- **Kimlik doğrulama:** OpenIddict `password` grant. Giriş ekranı böylece SPA'nın kendi tasarımı
+  içinde kalıyor. 401 alındığında bir kez `refresh_token` denenip istek tekrarlanıyor.
+- **Yetki:** `/api/abp/application-configuration` çağrısından `grantedPolicies` okunuyor; admin
+  kontrolleri ona bağlı. Bu yalnızca UI gizleme — gerçek koruma sunucuda.
+- **Çok dillilik:** `en` ve `tr` sözlüklerinin ikisi de `Record<TranslationKey, string>` tipinde,
+  yani birinde eksik kalan anahtar **derleme hatası** oluyor.
 
 ---
 
-## ABP şablonuna dair notlar
+## Varsayımlar
 
-Bu çözüm ABP'nin katmanlı startup şablonundan üretilmiştir. Şablona özgü konular
-(OpenIddict sertifikası, `abp install-libs`, deployment) için
-[ABP dokümantasyonuna](https://abp.io/docs/latest/solution-templates/layered-web-application) bakabilirsiniz.
+Ödev metninde açık olmayan noktalarda verdiğim kararlar:
+
+1. **Görünürlük:** Ziyaretçi yalnızca `Approved` görür (metinde yazdığı gibi). Giriş yapmış
+   kullanıcılar **tüm statüleri** görür — böylece kendi açtıkları `Pending` talebi ve topluluğun
+   bekleyen taleplerini görebiliyorlar.
+2. **Yorum minimum uzunluğu 100 karakter**, metinde yazdığı gibi uygulandı.
+   `FeatureRequestConsts.MinCommentTextLength` ile tek noktadan yönetiliyor.
+3. **Ana sayfa doğrudan liste sayfasıdır** (`/`); şablonun karşılama sayfası kaldırıldı.
+4. **Liste kolonları:** İstenen Başlık / Oy / Durum kolonlarına ek olarak **Oluşturulma** kolonu
+   eklendi. Varsayılan sıralama oluşturulma tarihine göre olduğu için bu kolonun görünmesi
+   sıralamayı anlaşılır kılıyor.
+5. **Statü geçişlerinde kural yok.** Şartname "admin istediği status'e serbestçe geçebilir" dediği
+   için kısıtlamadım; gerekseydi `FeatureRequest.SetStatus` içine bir state machine konurdu.
+6. **PostgreSQL portu 5433**, geliştirme makinelerinde 5432 sıklıkla dolu olduğu için.
+
+### Şartname dışında eklediklerim
+
+Bunlar istenmemişti, kendim ekledim — değerlendirmede ayırt edilebilsin diye ayrıca yazıyorum:
+
+- **React + TypeScript arayüz** (`src/FeatureRequestPortal.SPA`) — Razor'a dokunulmadan, yanına.
+- **Kayıt akışı:** e-posta ile kod doğrulama + admin onayı, ve şifre sıfırlama.
+- **Türkçe / İngilizce** dil desteği (her iki arayüzde).
+- **Seçilebilir sayfa boyutu** (varsayılan 15; 20/30/50 de seçilebiliyor).
+
+---
+
+## Zorlandığım noktalar
+
+### 1. macOS Keychain tüm sunucuyu kilitledi
+
+React arayüzünü bağlarken ilk giriş denemesinde `/connect/token` isteği hiç dönmedi — ve ardından
+sunucu **bütün** isteklere cevap vermez oldu. Log token üretiminin ortasında kesiliyordu.
+
+Önce veritabanına baktım: `pg_stat_activity`'de "idle in transaction" bir bağlantı vardı ama
+bekleyen hiçbir lock yoktu, yani kilit veritabanında değildi. Process %0 CPU'da uyuyordu.
+`dotnet-stack` ile managed stack dump aldım ve thread'i şurada buldum:
+
+```
+Interop+AppleCrypto.AppleCryptoNative_SecKeyCreateSignature
+  → RSASecurityTransforms.TrySignHash
+    → JsonWebTokenHandler.CreateToken
+      → OpenIddict ... GenerateIdentityModelToken
+```
+
+Sebep: ABP'nin development imzalama sertifikası macOS'ta login Keychain'de duruyor. JWT imzalamak
+Keychain onayı gerektiriyor ve GUI oturumuna bağlı olmayan bir process bu onayı asla alamıyor.
+Tek bir asılı istek thread pool'u tıkayınca sunucunun tamamı sağır oluyordu.
+
+Çözüm: Development'ta `AddEphemeralEncryptionKey()` / `AddEphemeralSigningKey()` — anahtarlar
+bellekte, Keychain'e hiç gidilmiyor. Production yolu değişmedi. Hatanın daha önce çıkmamasının
+sebebi Razor arayüzünün cookie authentication kullanması; token endpoint'ine hiç gitmiyordu.
+
+### 2. Uygulama e-posta gönderiyor sanıyordum, göndermiyordu
+
+SMTP ayarları doğruydu, kayıt akışı hatasız çalışıyordu, hiçbir exception yoktu — ama doğrulama
+kodu maili hiç ulaşmıyordu.
+
+SMTP bilgilerinin doğruluğunu bağımsız bir script'le kanıtladıktan sonra sorunun uygulamada
+olduğunu anladım ve log'da şu satırı buldum: **`USING NullEmailSender!`**. ABP, Development
+ortamında `IEmailSender`'ı `NullEmailSender` ile değiştiriyor; mail üretiliyor, loglanıyor ve
+sessizce çöpe atılıyor.
+
+Çözüm: sender'ı açıkça seçmek — SMTP host tanımlıysa gerçek `SmtpEmailSender`, tanımlı değilse
+mailleri diske yazan bir `FileEmailSender`. İkincisi sessizce yutmuyor, konsola uyarı düşüyor.
+
+Buradan çıkardığım ders: **"hata yok" ile "iş yapıldı" aynı şey değil.**
+
+### 3. Aynı istek curl'de 200, tarayıcıda 400 dönüyordu
+
+React arayüzünden yapılan POST'lar 400 dönüyordu; aynı isteği `curl` ile atınca 200 alıyordum.
+
+Fark şuydu: Vite proxy'si SPA'yı backend ile **aynı origin**'e koyuyor, dolayısıyla tarayıcı ABP'nin
+antiforgery cookie'sini her istekte geri gönderiyor. ABP bunu görünce isteği "cookie ile
+doğrulanmış" sayıp `RequestVerificationToken` header'ı bekliyor. `curl`'de cookie olmadığı için o
+kontrol hiç tetiklenmiyordu.
+
+Çözüm: ABP'nin okunabilir `XSRF-TOKEN` cookie'sini okuyup güvenli olmayan HTTP metotlarında bu
+header ile geri göndermek.
+
+### 4. Mapperly: derlenen ama çalışmayan mapper
+
+Bu şablon AutoMapper değil **Mapperly** ile geliyor, dolayısıyla ABP dokümanlarındaki `CreateMap<>`
+yaklaşımı burada çalışmıyor. Mapper sınıfının `[Mapper]` ile işaretlenip `MapperBase<,>`'den
+türemesi gerekiyor.
+
+Tuzak şu: `IAbpMapperlyMapper<,>` arayüzünü doğrudan implemente etmek **derleniyor**, ama runtime'da
+`AddMapperlyObjectMapper` mapper'ı bulamıyor ve *"No object mapping was found"* hatası veriyor.
+Çünkü o arayüz `Map` dışında `BeforeMap`/`AfterMap` hook'larını da bekliyor; `MapperBase` bunları
+hazır veriyor. Derleyici uyarmadığı için bunu ancak entegrasyon testlerini yazdıktan sonra fark
+ettim.
+
+### 5. Sonradan eklenen permission mevcut veritabanına hiç ulaşmıyor
+
+Kayıt onayı için `Users.Approve` yetkisini ekledim, ama admin ile giriş yapınca yeni admin sayfasına
+erişemedim.
+
+Sebep: ABP tüm yetkileri admin rolüne **yalnızca o rolü ilk yarattığı anda** veriyor. Sonradan
+tanımlanan bir permission mevcut bir veritabanına hiç ulaşmıyor. Sıfırdan kurulan bir veritabanında
+sorun görünmediği için fark etmesi de kolay değil.
+
+Çözüm: `AdminPermissionDataSeedContributor` ile yetkiyi idempotent şekilde vermek — güncellenen
+veritabanlarını onarıyor, yeni kurulumları etkilemiyor.
+
+---
+
+## Öğrendiklerim
+
+**ABP'nin konvansiyonları çok şey veriyor, ama ne yaptığını bilmek şart.** Auto API controller'lar,
+soft-delete için global query filter, audit alanlarının otomatik doldurulması, permission sistemi —
+bunların hiçbirini yazmadım. Buna karşılık framework'ün sessizce devreye giren davranışları
+(development'ta `NullEmailSender`, permission'ları yalnızca rol yaratılırken verme,
+`IHtmlLocalizer.Value`'nun formatlamaması) en çok vakit kaybettiren şeyler oldu. Bir framework'ü
+öğrenmek, ne yaptığını olduğu kadar **ne zaman sizin yerinize karar verdiğini** öğrenmek demek.
+
+**Katman kuralları soyut değil, somut sonuçları var.** `Application.Contracts`'ın `Domain`'i
+görmemesi başta gereksiz bir kısıt gibi geldi; sonra DTO'daki `[StringLength]` attribute'u ile
+entity'deki doğrulamanın aynı sabiti kullanması gerektiğinde sabitin neden `Domain.Shared`'da olması
+gerektiğini anladım. Kural, sözleşme paketinin tek başına dağıtılabilir kalmasını sağlıyor.
+
+**"Test geçiyor" ile "çalışıyor" farklı şeyler.** Silme onayı mesajındaki `{0}` yer tutucusunu,
+`NullEmailSender`'ı ve tarayıcı-curl farkını testler yakalamadı; hepsini uygulamayı gerçekten
+çalıştırıp tarayıcıda tıklayarak buldum. Aynı şekilde SPA'da `tsc --noEmit`'in aslında hiçbir şeyi
+kontrol etmediğini, sözlüğü bilerek bozup hâlâ "temiz" dediğini görünce fark ettim. **Yeşil bir
+çıktı, doğrulama anlamına gelmiyor** — o çıktının gerçekten ne kontrol ettiğini bilmek gerekiyor.
+
+**Güvenlik çoğu zaman "kullanıcı girdisini kapalı bir kümeye eşlemek" demek.** Dinamik LINQ ile
+string'den sorgu üretmek güçlü ama tehlikeli; `NormalizeSorting` ve `NormalizePageSize` gibi küçük
+whitelist'ler bu gücü güvenli hale getiriyor. Aynı mantıkla 403 yerine 404 dönmenin bir kaydın
+varlığını gizlediğini öğrendim — küçük bir tercih, gerçek bir sızıntıyı kapatıyor.
+
+**Denormalizasyon, encapsulation ile birlikte gelirse güvenli.** `VoteCount`'u ayrı kolonda tutmak
+performans için gerekliydi ama tutarsızlık riski taşıyordu. `private set` + tek bir metotta artırma
+ile riski tasarım seviyesinde kapattım. Performans kararlarının yanına onları koruyacak bir kısıt
+koymak gerekiyor.
