@@ -2,9 +2,8 @@
 
 public static class MultiTenancyConsts
 {
-    /* Enable/disable multi-tenancy easily in a single point.
-     * If you will never need to multi-tenancy, you can remove
-     * related modules and code parts, including this file.
-     */
-    public const bool IsEnabled = true;
+    /* Off: the portal serves one company, so there is nothing to partition by tenant. Leaving it on
+     * put a "Tenant: not selected / switch" box on the login page, which asks the visitor to make a
+     * choice that has no meaning here. */
+    public const bool IsEnabled = false;
 }

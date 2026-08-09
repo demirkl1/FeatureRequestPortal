@@ -4,3 +4,10 @@
     --lpx-logo: url('/images/logo/leptonx/logo-light.png');
     --lpx-logo-icon: url('/images/logo/leptonx/logo-light-thumbnail.png');
 }
+/* The account layout keeps the language switcher and the tenant box in one card, separated by a
+   rule. Multi-tenancy is off, so the tenant box renders nothing and the rule ends up dividing the
+   switcher from empty space. Matching only when the rule is the last child keeps this scoped: if
+   multi-tenancy is ever switched back on, the tenant box follows it and the rule stays visible. */
+.abp-account-layout .card-body > hr:last-child {
+    display: none;
+}
