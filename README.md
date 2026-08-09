@@ -8,7 +8,6 @@ Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata
 
 **ABP Framework 10.6** · **.NET 10** · **MVC / Razor Pages** (LeptonX Lite) · **EF Core** ·
 **PostgreSQL** · Mapperly · xUnit
-Ek olarak: aynı HTTP API'yi tüketen bir **React 19 + TypeScript** arayüzü.
 
 ---
 
@@ -29,7 +28,6 @@ Ek olarak: aynı HTTP API'yi tüketen bir **React 19 + TypeScript** arayüzü.
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Docker (ya da lokal bir PostgreSQL sunucusu)
-- Node.js **20.19+** veya **22.12+** (yalnızca opsiyonel React arayüzü için — Vite 8'in gereksinimi)
 
 ### 1. Veritabanını başlat
 
@@ -74,19 +72,7 @@ dotnet run
 
 Swagger: <https://localhost:44372/swagger>
 
-### 4. (Opsiyonel) React arayüzünü çalıştır
-
-```bash
-cd src/FeatureRequestPortal.SPA
-npm install
-npm run dev
-```
-
-<http://localhost:5173> adresinde açılır. **Backend'in ayrıca çalışıyor olması gerekir** (adım 3),
-çünkü Vite dev server'ı `/api` ve `/connect` isteklerini `https://localhost:44372` adresine
-proxy'ler. Proxy sayesinde tarayıcı self-signed sertifikayla hiç muhatap olmaz.
-
-### 5. (Opsiyonel) E-posta gönderimi
+### 4. (Opsiyonel) E-posta gönderimi
 
 Kayıt doğrulama kodu, hesap onay bildirimi ve şifre sıfırlama linki e-posta ile gider.
 
@@ -110,8 +96,7 @@ Sırlar **user secrets**'ta tutulur, repoya girmez.
 ### Testler
 
 ```bash
-dotnet test                                   # 28 test
-cd src/FeatureRequestPortal.SPA && npx tsc -b  # SPA tip kontrolü
+dotnet test    # 28 test
 ```
 
 | Proje | Adet | Tür |
@@ -119,9 +104,6 @@ cd src/FeatureRequestPortal.SPA && npx tsc -b  # SPA tip kontrolü
 | `Domain.Tests` | 10 | Saf unit test, veritabanı yok |
 | `EntityFrameworkCore.Tests` | 17 | Entegrasyon, SQLite in-memory |
 | `Web.Tests` | 1 | Smoke |
-
-> SPA için `npx tsc --noEmit` **hiçbir şeyi kontrol etmez** — kök `tsconfig.json` solution-style
-> olduğu için sessizce başarılı olur. Doğru komut `tsc -b`, `npm run build` de onu çalıştırır.
 
 ---
 
@@ -176,22 +158,6 @@ Yanlış kod reddedilir; admin kuyruğunda yalnızca e-postasını doğrulamış
 |---|---|---|
 | ![Yanlış kod](docs/screenshots-accounts/03-wrong-code.jpg) | ![Kuyruk](docs/screenshots-accounts/05-admin-queue.jpg) | ![Sıfırlama](docs/screenshots-accounts/07-reset-password.jpg) |
 
-### React arayüzü — ekranlar
-
-Aynı backend'in React + TypeScript arayüzü: tasarım token'ları, açık/koyu tema, Türkçe/İngilizce.
-
-| Liste (açık tema) | Liste — admin (koyu tema) |
-|---|---|
-| ![SPA liste](docs/screenshots-spa/01-spa-list-anonymous.jpg) | ![SPA admin](docs/screenshots-spa/04-spa-list-admin-dark.jpg) |
-
-| Detay — admin | Mükerrer oy engeli |
-|---|---|
-| ![SPA detay](docs/screenshots-spa/06-spa-detail-admin-dark.jpg) | ![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg) |
-
-| Türkçe | Mobil (380px) |
-|---|---|
-| ![SPA Türkçe](docs/screenshots-spa/11-spa-turkish.jpg) | ![SPA mobil](docs/screenshots-spa/09-spa-mobile.jpg) |
-
 ---
 
 ## Mimari
@@ -206,8 +172,7 @@ ABP'nin katmanlı (DDD) yapısı:
 | `Application.Contracts` | DTO'lar, app service interface'leri, permission tanımları |
 | `Application` | App service implementasyonları, Mapperly mapper'ları |
 | `HttpApi` | Auto API controller'lar buradan expose edilir |
-| `Web` | Razor Pages, menü, CORS, Swagger, e-posta gönderimi |
-| `SPA` | React + TypeScript arayüz (ABP katmanı değil, ayrı bir Vite projesi) |
+| `Web` | Razor Pages, menü, Swagger, e-posta gönderimi |
 
 **Kritik referans kuralı:** `Application.Contracts` yalnızca `Domain.Shared`'ı görür, `Domain`'i
 görmez. Sözleşme paketi istemciye dağıtılabilir olmalı; entity'leri ve iş kurallarını sürüklememeli.
@@ -265,19 +230,6 @@ silme ABP permission'larına bağlı (`FeatureRequests.ChangeStatus`, `FeatureRe
 Talep açma, oy verme ve yorum yapma için ayrı permission tanımlamadım: bunlar **her** giriş yapmış
 kullanıcıda var, permission yapmak hiç kapatılmayacak bir anahtar tanımlamak olurdu.
 
-### React arayüzü
-
-Razor Pages arayüzü olduğu gibi duruyor; SPA onun yerine geçmiyor, yanında duruyor ve ABP'nin
-otomatik ürettiği HTTP API'yi tüketiyor. Bu aynı zamanda API'nin gerçekten istemci-agnostik
-olduğunun kanıtı.
-
-- **Kimlik doğrulama:** OpenIddict `password` grant. Giriş ekranı böylece SPA'nın kendi tasarımı
-  içinde kalıyor. 401 alındığında bir kez `refresh_token` denenip istek tekrarlanıyor.
-- **Yetki:** `/api/abp/application-configuration` çağrısından `grantedPolicies` okunuyor; admin
-  kontrolleri ona bağlı. Bu yalnızca UI gizleme — gerçek koruma sunucuda.
-- **Çok dillilik:** `en` ve `tr` sözlüklerinin ikisi de `Record<TranslationKey, string>` tipinde,
-  yani birinde eksik kalan anahtar **derleme hatası** oluyor.
-
 ---
 
 ## Varsayımlar
@@ -301,9 +253,8 @@ olduğunun kanıtı.
 
 Bunlar istenmemişti, kendim ekledim — değerlendirmede ayırt edilebilsin diye ayrıca yazıyorum:
 
-- **React + TypeScript arayüz** (`src/FeatureRequestPortal.SPA`) — Razor'a dokunulmadan, yanına.
 - **Kayıt akışı:** e-posta ile kod doğrulama + admin onayı, ve şifre sıfırlama.
-- **Türkçe / İngilizce** dil desteği (her iki arayüzde).
+- **Türkçe / İngilizce** dil desteği.
 - **Seçilebilir sayfa boyutu** (varsayılan 15; 20/30/50 de seçilebiliyor).
 
 ---
@@ -312,8 +263,8 @@ Bunlar istenmemişti, kendim ekledim — değerlendirmede ayırt edilebilsin diy
 
 ### 1. macOS Keychain tüm sunucuyu kilitledi
 
-React arayüzünü bağlarken ilk giriş denemesinde `/connect/token` isteği hiç dönmedi — ve ardından
-sunucu **bütün** isteklere cevap vermez oldu. Log token üretiminin ortasında kesiliyordu.
+OAuth ile token üreten bir akışı ilk kez denediğimde `/connect/token` isteği hiç dönmedi — ve
+ardından sunucu **bütün** isteklere cevap vermez oldu. Log token üretiminin ortasında kesiliyordu.
 
 Önce veritabanına baktım: `pg_stat_activity`'de "idle in transaction" bir bağlantı vardı ama
 bekleyen hiçbir lock yoktu, yani kilit veritabanında değildi. Process %0 CPU'da uyuyordu.
@@ -332,7 +283,8 @@ Tek bir asılı istek thread pool'u tıkayınca sunucunun tamamı sağır oluyor
 
 Çözüm: Development'ta `AddEphemeralEncryptionKey()` / `AddEphemeralSigningKey()` — anahtarlar
 bellekte, Keychain'e hiç gidilmiyor. Production yolu değişmedi. Hatanın daha önce çıkmamasının
-sebebi Razor arayüzünün cookie authentication kullanması; token endpoint'ine hiç gitmiyordu.
+sebebi Razor arayüzünün cookie authentication kullanması: sayfalar token endpoint'ine hiç
+gitmiyor, dolayısıyla imzalama koduna da hiç uğranmıyordu.
 
 ### 2. Uygulama e-posta gönderiyor sanıyordum, göndermiyordu
 
@@ -349,17 +301,21 @@ mailleri diske yazan bir `FileEmailSender`. İkincisi sessizce yutmuyor, konsola
 
 Buradan çıkardığım ders: **"hata yok" ile "iş yapıldı" aynı şey değil.**
 
-### 3. Aynı istek curl'de 200, tarayıcıda 400 dönüyordu
+### 3. Ekranda ham `{0}` görünüyordu
 
-React arayüzünden yapılan POST'lar 400 dönüyordu; aynı isteği `curl` ile atınca 200 alıyordum.
+Silme onayı mesajını Razor'da `@L["AreYouSureToDelete", Title].Value` ile kurmuştum. Derleniyor,
+hata vermiyor — ama ekranda mesaj `'{0}' kaydını silmek istediğinize emin misiniz?` şeklinde, yer
+tutucu ham haliyle çıkıyordu.
 
-Fark şuydu: Vite proxy'si SPA'yı backend ile **aynı origin**'e koyuyor, dolayısıyla tarayıcı ABP'nin
-antiforgery cookie'sini her istekte geri gönderiyor. ABP bunu görünce isteği "cookie ile
-doğrulanmış" sayıp `RequestVerificationToken` header'ı bekliyor. `curl`'de cookie olmadığı için o
-kontrol hiç tetiklenmiyordu.
+Sebep: `IHtmlLocalizer` formatlamayı ancak HTML render edilirken yapıyor; `.Value` ise kaynak
+metni olduğu gibi döndürüyor, argümanları hiç uygulamıyor. Mesajı `IStringLocalizer` kullanan
+PageModel içinde kurunca düzeldi.
 
-Çözüm: ABP'nin okunabilir `XSRF-TOKEN` cookie'sini okuyup güvenli olmayan HTTP metotlarında bu
-header ile geri göndermek.
+Benzer bir tuzağa `BusinessException` ile de düştüm: ABP hata kodunu lokalize cümleye ancak
+exception'ı HTTP cevabına çevirirken dönüştürüyor. Razor'da `catch` edip `exception.Message`
+yazdırınca ekranda hiçbir şey görünmüyordu; metni doğrudan `IStringLocalizer`'dan almak gerekti.
+
+İkisini de testler yakalamadı — uygulamayı gerçekten açıp tıklayınca gördüm.
 
 ### 4. Mapperly: derlenen ama çalışmayan mapper
 
@@ -402,10 +358,10 @@ entity'deki doğrulamanın aynı sabiti kullanması gerektiğinde sabitin neden 
 gerektiğini anladım. Kural, sözleşme paketinin tek başına dağıtılabilir kalmasını sağlıyor.
 
 **"Test geçiyor" ile "çalışıyor" farklı şeyler.** Silme onayı mesajındaki `{0}` yer tutucusunu,
-`NullEmailSender`'ı ve tarayıcı-curl farkını testler yakalamadı; hepsini uygulamayı gerçekten
-çalıştırıp tarayıcıda tıklayarak buldum. Aynı şekilde SPA'da `tsc --noEmit`'in aslında hiçbir şeyi
-kontrol etmediğini, sözlüğü bilerek bozup hâlâ "temiz" dediğini görünce fark ettim. **Yeşil bir
-çıktı, doğrulama anlamına gelmiyor** — o çıktının gerçekten ne kontrol ettiğini bilmek gerekiyor.
+boş görünen hata mesajını ve hiç gönderilmeyen e-postaları testler yakalamadı; üçünü de uygulamayı
+gerçekten çalıştırıp tarayıcıda tıklayarak buldum. Hepsinin ortak yanı, hiçbirinin hata üretmemesi:
+derleme temiz, testler yeşil, log sessiz. **Yeşil bir çıktı doğrulama anlamına gelmiyor** — o
+çıktının gerçekten neyi kontrol ettiğini bilmek gerekiyor.
 
 **Güvenlik çoğu zaman "kullanıcı girdisini kapalı bir kümeye eşlemek" demek.** Dinamik LINQ ile
 string'den sorgu üretmek güçlü ama tehlikeli; `NormalizeSorting` ve `NormalizePageSize` gibi küçük

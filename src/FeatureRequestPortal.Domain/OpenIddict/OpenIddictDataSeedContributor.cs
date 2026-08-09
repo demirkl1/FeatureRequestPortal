@@ -127,30 +127,6 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             );
         }
 
-        /* React SPA client.
-         * The resource-owner-password grant lets the SPA render its own login screen instead of
-         * redirecting to the LeptonX login page, which keeps the whole React UX self-contained.
-         * A production deployment should move this client to authorization_code + PKCE. */
-        var spaClientId = configurationSection["FeatureRequestPortal_SPA:ClientId"];
-        if (!spaClientId.IsNullOrWhiteSpace())
-        {
-            var spaRootUrl = configurationSection["FeatureRequestPortal_SPA:RootUrl"]?.TrimEnd('/');
-
-            await CreateApplicationAsync(
-                name: spaClientId!,
-                type: OpenIddictConstants.ClientTypes.Public,
-                consentType: OpenIddictConstants.ConsentTypes.Implicit,
-                displayName: "React SPA Application",
-                secret: null,
-                grantTypes: new List<string>
-                {
-                    OpenIddictConstants.GrantTypes.Password,
-                    OpenIddictConstants.GrantTypes.RefreshToken
-                },
-                scopes: commonScopes,
-                clientUri: spaRootUrl
-            );
-        }
     }
 
     private async Task CreateApplicationAsync(

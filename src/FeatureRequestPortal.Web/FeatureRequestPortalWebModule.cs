@@ -136,7 +136,6 @@ public class FeatureRequestPortalWebModule : AbpModule
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
-        ConfigureCors(context, configuration);
         ConfigureEmailing(context, configuration);
 
         context.Services.AddMapperlyObjectMapper<FeatureRequestPortalWebModule>();
@@ -205,34 +204,6 @@ public class FeatureRequestPortalWebModule : AbpModule
     }
 
     /// <summary>
-    /// The React SPA runs on its own origin (the Vite dev server), so the auto API controllers
-    /// and the OpenIddict token endpoint have to accept cross-origin calls from it.
-    /// </summary>
-    private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
-    {
-        context.Services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(builder =>
-            {
-                builder
-                    .WithOrigins(
-                        configuration["App:CorsOrigins"]?
-                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                            .Select(o => o.RemovePostFix("/"))
-                            .ToArray() ?? Array.Empty<string>()
-                    )
-                    /* ABP signals a localized business error through this header; without
-                     * exposing it the SPA cannot tell a business failure from a transport one. */
-                    .WithExposedHeaders("_AbpErrorFormat")
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
-        });
-    }
-
-    /// <summary>
     /// Picks the email sender explicitly, because ABP swaps in a NullEmailSender for every
     /// development run - it only logs "USING NullEmailSender!" and drops the message, so a
     /// perfectly good SMTP configuration silently sends nothing.
@@ -296,7 +267,6 @@ public class FeatureRequestPortalWebModule : AbpModule
         });
 
         app.UseRouting();
-        app.UseCors();
         app.UseAuthentication();
         app.UseAbpOpenIddictValidation();
 
