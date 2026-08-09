@@ -90,18 +90,6 @@ public class FeatureRequestAppService : FeatureRequestPortalAppService, IFeature
         await _featureRequestRepository.UpdateAsync(featureRequest, autoSave: true);
     }
 
-    /// <summary>
-    /// Withdraws the current user's vote so an accidental click can be undone.
-    /// </summary>
-    public virtual async Task RemoveVoteAsync(Guid id)
-    {
-        var featureRequest = await GetWithDetailsAsync(id);
-
-        featureRequest.RemoveVote(CurrentUser.GetId());
-
-        await _featureRequestRepository.UpdateAsync(featureRequest, autoSave: true);
-    }
-
     public virtual async Task<CommentDto> AddCommentAsync(Guid id, CreateCommentDto input)
     {
         var featureRequest = await GetWithDetailsAsync(id);

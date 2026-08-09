@@ -123,48 +123,6 @@ public abstract class FeatureRequestAppServiceTests<TStartupModule> : FeatureReq
     }
 
     [Fact]
-    public async Task Should_Withdraw_The_Vote()
-    {
-        var created = await _featureRequestAppService.CreateAsync(NewFeatureRequest());
-        await _featureRequestAppService.VoteAsync(created.Id);
-
-        await _featureRequestAppService.RemoveVoteAsync(created.Id);
-
-        var detail = await _featureRequestAppService.GetAsync(created.Id);
-        detail.VoteCount.ShouldBe(0);
-        detail.HasCurrentUserVoted.ShouldBeFalse();
-    }
-
-    [Fact]
-    public async Task Should_Not_Withdraw_A_Vote_That_Was_Never_Cast()
-    {
-        var created = await _featureRequestAppService.CreateAsync(NewFeatureRequest());
-
-        var exception = await Should.ThrowAsync<BusinessException>(
-            async () => await _featureRequestAppService.RemoveVoteAsync(created.Id));
-
-        exception.Code.ShouldBe(FeatureRequestPortalDomainErrorCodes.NotVoted);
-    }
-
-    /// <summary>
-    /// Guards the unique index on (FeatureRequestId, CreatorId): withdrawing has to delete the
-    /// vote row outright, otherwise the second vote would hit a duplicate key error.
-    /// </summary>
-    [Fact]
-    public async Task Should_Allow_Voting_Again_After_Withdrawing()
-    {
-        var created = await _featureRequestAppService.CreateAsync(NewFeatureRequest());
-        await _featureRequestAppService.VoteAsync(created.Id);
-        await _featureRequestAppService.RemoveVoteAsync(created.Id);
-
-        await _featureRequestAppService.VoteAsync(created.Id);
-
-        var detail = await _featureRequestAppService.GetAsync(created.Id);
-        detail.VoteCount.ShouldBe(1);
-        detail.HasCurrentUserVoted.ShouldBeTrue();
-    }
-
-    [Fact]
     public async Task Should_Honour_An_Offered_Page_Size()
     {
         var result = await _featureRequestAppService.GetListAsync(

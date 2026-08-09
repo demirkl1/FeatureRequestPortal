@@ -6,7 +6,5 @@ public static class FeatureRequestPortalDomainErrorCodes
 
     public const string AlreadyVoted = "FeatureRequestPortal:AlreadyVoted";
 
-    public const string NotVoted = "FeatureRequestPortal:NotVoted";
-
     public const string InvalidVerificationCode = "FeatureRequestPortal:InvalidVerificationCode";
 }

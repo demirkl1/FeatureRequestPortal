@@ -86,28 +86,6 @@ public class FeatureRequest : FullAuditedAggregateRoot<Guid>
         return vote;
     }
 
-    /// <summary>
-    /// Withdraws the user's up-vote, so a mis-click can be undone. The vote row is removed
-    /// outright rather than soft-deleted, otherwise the unique index on
-    /// (FeatureRequestId, CreatorId) would stop the same user from voting again later.
-    /// </summary>
-    /// <exception cref="BusinessException">Thrown when the user has not voted.</exception>
-    public virtual Vote RemoveVote(Guid userId)
-    {
-        var vote = Votes.FirstOrDefault(vote => vote.CreatorId == userId);
-
-        if (vote == null)
-        {
-            throw new BusinessException(FeatureRequestPortalDomainErrorCodes.NotVoted)
-                .WithData("FeatureRequestId", Id);
-        }
-
-        Votes.Remove(vote);
-        VoteCount--;
-
-        return vote;
-    }
-
     public virtual bool HasVoted(Guid userId)
     {
         return Votes.Any(vote => vote.CreatorId == userId);

@@ -79,24 +79,18 @@ export type TranslationKey =
   | 'detail.error.load'
   | 'detail.error.notFound'
   | 'detail.error.vote'
-  | 'detail.error.withdraw'
   | 'detail.error.comment'
   | 'detail.error.status'
   | 'detail.error.delete'
   | 'detail.toast.voteRecorded'
-  | 'detail.toast.voteWithdrawn'
   | 'detail.toast.commentAdded'
   | 'detail.toast.statusUpdated'
   | 'detail.toast.requestDeleted'
   | 'detail.delete.title'
   | 'detail.delete.description'
   | 'detail.delete.confirm'
-  | 'detail.withdraw.title'
-  | 'detail.withdraw.description'
-  | 'detail.withdraw.confirm'
   | 'vote.label.vote'
   | 'vote.label.voted'
-  | 'vote.aria.withdraw'
   | 'vote.reason.signIn'
   | 'vote.reason.voted'
   | 'create.title'
@@ -254,12 +248,10 @@ export const en: Record<TranslationKey, string> = {
   'detail.error.load': 'Failed to load this request.',
   'detail.error.notFound': 'This request could not be found.',
   'detail.error.vote': 'Unable to vote right now.',
-  'detail.error.withdraw': 'Unable to withdraw your vote right now.',
   'detail.error.comment': 'Unable to add comment.',
   'detail.error.status': 'Unable to update status.',
   'detail.error.delete': 'Unable to delete this request.',
   'detail.toast.voteRecorded': 'Vote recorded.',
-  'detail.toast.voteWithdrawn': 'Vote withdrawn.',
   'detail.toast.commentAdded': 'Comment added.',
   'detail.toast.statusUpdated': 'Status updated.',
   'detail.toast.requestDeleted': 'Request deleted.',
@@ -267,13 +259,9 @@ export const en: Record<TranslationKey, string> = {
   'detail.delete.description':
     'This soft-deletes the request and removes it from all listings. Only an administrator can restore it.',
   'detail.delete.confirm': 'Delete',
-  'detail.withdraw.title': 'Withdraw vote',
-  'detail.withdraw.description': 'Are you sure you want to withdraw your vote?',
-  'detail.withdraw.confirm': 'Withdraw',
 
   'vote.label.vote': 'Vote',
   'vote.label.voted': 'Voted',
-  'vote.aria.withdraw': 'Withdraw vote',
   'vote.reason.signIn': 'Sign in to vote on this request.',
   'vote.reason.voted': 'You have already voted for this feature request.',
 
@@ -442,12 +430,10 @@ export const tr: Record<TranslationKey, string> = {
   'detail.error.load': 'Bu talep yüklenemedi.',
   'detail.error.notFound': 'Bu talep bulunamadı.',
   'detail.error.vote': 'Şu anda oy verilemiyor.',
-  'detail.error.withdraw': 'Oyunuz şu anda geri çekilemiyor.',
   'detail.error.comment': 'Yorum eklenemedi.',
   'detail.error.status': 'Durum güncellenemedi.',
   'detail.error.delete': 'Bu talep silinemedi.',
   'detail.toast.voteRecorded': 'Oy kaydedildi.',
-  'detail.toast.voteWithdrawn': 'Oy geri çekildi.',
   'detail.toast.commentAdded': 'Yorum eklendi.',
   'detail.toast.statusUpdated': 'Durum güncellendi.',
   'detail.toast.requestDeleted': 'Talep silindi.',
@@ -455,13 +441,9 @@ export const tr: Record<TranslationKey, string> = {
   'detail.delete.description':
     'Bu işlem talebi yumuşak şekilde siler ve tüm listelerden kaldırır. Yalnızca bir yönetici geri yükleyebilir.',
   'detail.delete.confirm': 'Sil',
-  'detail.withdraw.title': 'Oyu geri çek',
-  'detail.withdraw.description': 'Oyunuzu geri çekmek istediğinize emin misiniz?',
-  'detail.withdraw.confirm': 'Geri çek',
 
   'vote.label.vote': 'Oy ver',
   'vote.label.voted': 'Oy verdiniz',
-  'vote.aria.withdraw': 'Oyu geri çek',
   'vote.reason.signIn': 'Bu talebe oy vermek için giriş yapın.',
   'vote.reason.voted': 'Bu özellik talebine zaten oy verdiniz.',
 

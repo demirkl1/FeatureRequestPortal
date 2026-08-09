@@ -8,38 +8,22 @@ interface VoteButtonProps {
   isAuthenticated: boolean;
   isBusy: boolean;
   onVote: () => void;
-  onWithdrawClick: () => void;
 }
 
-export function VoteButton({
-  voteCount,
-  hasVoted,
-  isAuthenticated,
-  isBusy,
-  onVote,
-  onWithdrawClick,
-}: VoteButtonProps) {
+export function VoteButton({ voteCount, hasVoted, isAuthenticated, isBusy, onVote }: VoteButtonProps) {
   const { t } = useTranslation();
-  const disabled = !isAuthenticated || isBusy;
+  /* A vote only ever goes up and cannot be taken back, so once cast the button is spent. */
+  const disabled = !isAuthenticated || hasVoted || isBusy;
   const reason = !isAuthenticated ? t('vote.reason.signIn') : hasVoted ? t('vote.reason.voted') : null;
-
-  const handleClick = () => {
-    if (hasVoted) {
-      onWithdrawClick();
-    } else {
-      onVote();
-    }
-  };
 
   return (
     <div className="vote-button-group">
       <button
         type="button"
         className={`vote-button ${hasVoted ? 'vote-button--voted' : ''}`}
-        onClick={handleClick}
+        onClick={onVote}
         disabled={disabled}
         aria-pressed={hasVoted}
-        aria-label={hasVoted ? t('vote.aria.withdraw') : undefined}
         aria-describedby={reason ? 'vote-button-reason' : undefined}
       >
         <svg className="vote-button__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">

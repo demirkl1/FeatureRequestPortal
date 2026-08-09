@@ -89,62 +89,6 @@ public class FeatureRequestTests
     }
 
     [Fact]
-    public void RemoveVote_Should_Decrease_VoteCount_And_Drop_The_Vote()
-    {
-        var featureRequest = CreateFeatureRequest();
-        var userId = Guid.NewGuid();
-        featureRequest.AddVote(Guid.NewGuid(), userId);
-
-        featureRequest.RemoveVote(userId);
-
-        featureRequest.VoteCount.ShouldBe(0);
-        featureRequest.Votes.ShouldBeEmpty();
-        featureRequest.HasVoted(userId).ShouldBeFalse();
-    }
-
-    [Fact]
-    public void RemoveVote_Should_Throw_When_The_User_Has_Not_Voted()
-    {
-        var featureRequest = CreateFeatureRequest();
-
-        var exception = Should.Throw<BusinessException>(
-            () => featureRequest.RemoveVote(Guid.NewGuid()));
-
-        exception.Code.ShouldBe(FeatureRequestPortalDomainErrorCodes.NotVoted);
-        featureRequest.VoteCount.ShouldBe(0);
-    }
-
-    [Fact]
-    public void RemoveVote_Should_Only_Drop_The_Vote_Of_The_Given_User()
-    {
-        var featureRequest = CreateFeatureRequest();
-        var mine = Guid.NewGuid();
-        var someoneElse = Guid.NewGuid();
-        featureRequest.AddVote(Guid.NewGuid(), mine);
-        featureRequest.AddVote(Guid.NewGuid(), someoneElse);
-
-        featureRequest.RemoveVote(mine);
-
-        featureRequest.VoteCount.ShouldBe(1);
-        featureRequest.HasVoted(mine).ShouldBeFalse();
-        featureRequest.HasVoted(someoneElse).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void RemoveVote_Should_Allow_The_User_To_Vote_Again()
-    {
-        var featureRequest = CreateFeatureRequest();
-        var userId = Guid.NewGuid();
-        featureRequest.AddVote(Guid.NewGuid(), userId);
-        featureRequest.RemoveVote(userId);
-
-        featureRequest.AddVote(Guid.NewGuid(), userId);
-
-        featureRequest.VoteCount.ShouldBe(1);
-        featureRequest.HasVoted(userId).ShouldBeTrue();
-    }
-
-    [Fact]
     public void AddComment_Should_Add_The_Comment_To_The_Aggregate()
     {
         var featureRequest = CreateFeatureRequest();

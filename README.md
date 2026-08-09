@@ -9,7 +9,7 @@ Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata
 **Teknolojiler:** ABP Framework 10.6 · .NET 10 · MVC / Razor Pages (LeptonX Lite) · EF Core · PostgreSQL · Mapperly · xUnit
 **Ek arayüz:** React 19 · TypeScript · Vite (Razor Pages arayüzünün yanında, aynı HTTP API'yi tüketen ayrı bir SPA)
 
-Öne çıkanlar: rol bazlı görünürlük · her kullanıcıya tek oy (geri çekilebilir) · e-posta doğrulamalı
+Öne çıkanlar: rol bazlı görünürlük · her kullanıcıya tek oy · e-posta doğrulamalı
 ve **admin onaylı** kayıt · e-posta ile şifre sıfırlama · Türkçe/İngilizce · seçilebilir sayfa boyutu
 
 ---
@@ -95,7 +95,7 @@ takip edildiği için oraya parola yazmayın.
 ### Testler
 
 ```bash
-dotnet test                                    # 35 test (Domain 14, EF Core 20, Web 1)
+dotnet test                                    # 28 test (Domain 10, EF Core 17, Web 1)
 cd src/FeatureRequestPortal.SPA && npx tsc -b   # SPA tip kontrolü
 ```
 
@@ -194,12 +194,6 @@ Domain'den gelen `FeatureRequestPortal:AlreadyVoted` hatası toast olarak göste
 
 ![SPA mükerrer oy](docs/screenshots-spa/08-spa-already-voted.jpg)
 
-### Oyu geri çekme
-
-Yanlışlıkla verilen oy onay sorulduktan sonra geri çekilebilir.
-
-![SPA oy geri çekme](docs/screenshots-spa/10-spa-withdraw-dialog.jpg)
-
 ### Sayfa boyutu
 
 ![SPA sayfa boyutu](docs/screenshots-spa/12-spa-page-size.jpg)
@@ -247,12 +241,6 @@ Yalnızca e-postasını doğrulamış hesaplar listelenir.
 E-postadaki linkle ulaşılan sayfa.
 
 ![Şifre sıfırlama](docs/screenshots-accounts/07-reset-password.jpg)
-
-### 8. Razor tarafında oyu geri çekme
-
-![Razor oy geri çekme](docs/screenshots-accounts/08-razor-withdraw-confirm.jpg)
-
----
 
 ## Mimari
 
@@ -329,17 +317,6 @@ src/FeatureRequestPortal.SPA/src/
   sözlüklerinin ikisi de `Record<TranslationKey, string>` tipinde, dolayısıyla birinde eksik
   kalan anahtar **derleme hatası** olur. Tarihler `Intl.DateTimeFormat` ile dile göre biçimlenir.
 
-### Oyu geri çekme
-
-Yanlışlıkla verilen bir oy geri çekilebilir; her iki arayüz de önce onay sorar.
-
-`FeatureRequest.RemoveVote(userId)` oy kaydını **tamamen siler**, soft-delete etmez. Sebebi
-`AppVotes` üzerindeki `(FeatureRequestId, CreatorId)` unique index'i: kayıt silinmeseydi aynı
-kullanıcı bir daha oy veremezdi. Bu davranış `Should_Allow_Voting_Again_After_Withdrawing`
-testiyle korunuyor. Oy verilmemişken çağrılırsa `FeatureRequestPortal:NotVoted` hatası döner.
-
-API tarafında `POST /api/app/feature-request/{id}/vote` ile `DELETE .../vote` birbirinin karşılığı.
-
 ### Sayfa boyutu
 
 Kullanıcı 15 / 20 / 30 / 50 arasından seçer. Sunucu bu listeyi bir whitelist olarak uygular
@@ -402,17 +379,13 @@ FeatureRequest (FullAuditedAggregateRoot<Guid>)   → soft-delete
    anlaşılır kılıyor ve kullanıcı oy sıralamasından geri dönebiliyor.
 5. **PostgreSQL portu 5433.** Geliştirme makinelerinde 5432 sıklıkla dolu olduğu için Docker Compose
    bu porta map ediyor.
-6. **Oy geri çekme oyu siler, tersine kayıt bırakmaz.** Kim oy verip geri çekti bilgisi tutulmuyor;
-   şartname bunu istemiyor ve `(FeatureRequestId, CreatorId)` unique index'i zaten kullanıcı başına
-   tek satıra izin veriyor. Denetim izi gerekseydi `Vote`'u soft-delete edip index'e `IsDeleted`
-   eklemek gerekirdi.
-7. **Statü geçişlerinde kural yok.** Admin herhangi bir statüden herhangi birine geçebiliyor;
+6. **Statü geçişlerinde kural yok.** Admin herhangi bir statüden herhangi birine geçebiliyor;
    şartnamede geçiş kuralı tanımlı değil ve admin'in yanlışlıkla verdiği kararı geri alabilmesi
    pratikte daha değerli görünüyor. Gerekseydi `FeatureRequest.SetStatus` içine bir state machine
    konurdu.
-8. **Doğrulama kodu 6 hane ve süreli.** Identity'nin TOTP tabanlı sağlayıcısı kullanıldığı için
+7. **Doğrulama kodu 6 hane ve süreli.** Identity'nin TOTP tabanlı sağlayıcısı kullanıldığı için
    uzunluk bir tercih değil, sağlayıcının çıktısı; kod tekrar istenebiliyor.
-9. **Onaylanmayan hesap silinmiyor, bekliyor.** Reddetme ayrı bir aksiyon ve yalnızca hâlâ pasif
+8. **Onaylanmayan hesap silinmiyor, bekliyor.** Reddetme ayrı bir aksiyon ve yalnızca hâlâ pasif
    hesaplarda çalışıyor.
 
 ## Zorlandığım noktalar

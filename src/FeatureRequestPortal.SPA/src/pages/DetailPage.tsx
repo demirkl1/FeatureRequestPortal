@@ -8,7 +8,6 @@ import {
   changeFeatureRequestStatus,
   deleteFeatureRequest,
   getFeatureRequest,
-  removeVote,
   voteFeatureRequest,
 } from '../api/featureRequests';
 import { ApiError } from '../api/http';
@@ -43,8 +42,6 @@ export function DetailPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [isVoting, setIsVoting] = useState(false);
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isWithdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
   const [commentText, setCommentText] = useState('');
   const [commentTouched, setCommentTouched] = useState(false);
@@ -87,21 +84,6 @@ export function DetailPage() {
       showToast(err instanceof ApiError ? err.message : t('detail.error.vote'), 'error');
     } finally {
       setIsVoting(false);
-    }
-  };
-
-  const handleWithdraw = async () => {
-    if (!id) return;
-    setIsWithdrawing(true);
-    try {
-      await removeVote(id);
-      await load();
-      setWithdrawDialogOpen(false);
-      showToast(t('detail.toast.voteWithdrawn'), 'success');
-    } catch (err) {
-      showToast(err instanceof ApiError ? err.message : t('detail.error.withdraw'), 'error');
-    } finally {
-      setIsWithdrawing(false);
     }
   };
 
@@ -216,9 +198,8 @@ export function DetailPage() {
           voteCount={detail.voteCount}
           hasVoted={detail.hasCurrentUserVoted}
           isAuthenticated={currentUser.isAuthenticated}
-          isBusy={isVoting || isWithdrawing}
+          isBusy={isVoting}
           onVote={handleVote}
-          onWithdrawClick={() => setWithdrawDialogOpen(true)}
         />
       </section>
 
@@ -333,16 +314,6 @@ export function DetailPage() {
         isBusy={isDeleting}
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialogOpen(false)}
-      />
-
-      <ConfirmDialog
-        open={isWithdrawDialogOpen}
-        title={t('detail.withdraw.title')}
-        description={t('detail.withdraw.description')}
-        confirmLabel={t('detail.withdraw.confirm')}
-        isBusy={isWithdrawing}
-        onConfirm={handleWithdraw}
-        onCancel={() => setWithdrawDialogOpen(false)}
       />
     </div>
   );
