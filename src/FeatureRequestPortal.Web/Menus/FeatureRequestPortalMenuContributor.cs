@@ -1,11 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FeatureRequestPortal.Localization;
 using FeatureRequestPortal.Permissions;
-using FeatureRequestPortal.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
-using Volo.Abp.Identity.Web.Navigation;
-using Volo.Abp.SettingManagement.Web.Navigation;
-using Volo.Abp.TenantManagement.Web.Navigation;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.Users;
 
@@ -23,7 +19,6 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
 
     private async Task ConfigureMainMenuAsync(MenuConfigurationContext context)
     {
-        var administration = context.Menu.GetAdministration();
         var l = context.GetLocalizer<FeatureRequestPortalResource>();
 
         context.Menu.Items.Insert(
@@ -81,18 +76,12 @@ public class FeatureRequestPortalMenuContributor : IMenuContributor
             );
         }
 
-        if (MultiTenancyConsts.IsEnabled)
-        {
-            administration.SetSubItemOrder(TenantManagementMenuNames.GroupName, 1);
-        }
-        else
-        {
-            administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
-        }
-
-        administration.SetSubItemOrder(IdentityMenuNames.GroupName, 2);
-        administration.SetSubItemOrder(SettingManagementMenuNames.GroupName, 3);
-
-
+        /* The brief asks for a feature request portal, not a back office. ABP's Administration
+         * menu (identity, roles, settings, tenants) is dropped so the navigation only shows what
+         * the assignment describes. Permissions still come from the seeder, so nothing depends on
+         * those screens being reachable. */
+        /* TryRemoveMenuItem rather than GetAdministration(): the latter throws when the item is
+         * absent, and it is absent in the test host, which does not load the admin web modules. */
+        context.Menu.TryRemoveMenuItem(DefaultMenuNames.Application.Main.Administration);
     }
 }

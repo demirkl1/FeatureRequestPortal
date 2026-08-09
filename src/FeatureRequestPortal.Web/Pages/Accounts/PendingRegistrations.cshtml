@@ -41,7 +41,7 @@
                                     <form method="post"
                                           asp-page-handler="Approve"
                                           asp-route-userId="@user.Id"
-                                          data-confirm-message="@L["AreYouSureToApprove", user.UserName].Value"
+                                          data-confirm-message="@Model.ApproveConfirmationMessage(user.UserName)"
                                           class="js-confirm-form">
                                         <button type="submit" class="btn btn-sm btn-success">
                                             <i class="fa fa-check me-1"></i> @L["Approve"]
@@ -50,7 +50,7 @@
                                     <form method="post"
                                           asp-page-handler="Reject"
                                           asp-route-userId="@user.Id"
-                                          data-confirm-message="@L["AreYouSureToReject", user.UserName].Value"
+                                          data-confirm-message="@Model.RejectConfirmationMessage(user.UserName)"
                                           class="js-confirm-form">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="fa fa-times me-1"></i> @L["Reject"]

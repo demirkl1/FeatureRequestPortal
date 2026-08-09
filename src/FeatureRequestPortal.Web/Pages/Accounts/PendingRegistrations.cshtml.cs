@@ -25,6 +25,19 @@ public class PendingRegistrationsModel : FeatureRequestPortalPageModel
         PendingUsers = await _userApprovalAppService.GetPendingAsync();
     }
 
+    /* Built here rather than in the view: the view's L is an IHtmlLocalizer, whose .Value hands
+     * back the raw resource string and leaves the {0} placeholder unformatted. The page model's
+     * L is a string localizer and does apply the argument. */
+    public string ApproveConfirmationMessage(string userName)
+    {
+        return L["AreYouSureToApprove", userName];
+    }
+
+    public string RejectConfirmationMessage(string userName)
+    {
+        return L["AreYouSureToReject", userName];
+    }
+
     public async Task<IActionResult> OnPostApproveAsync(Guid userId)
     {
         await _userApprovalAppService.ApproveAsync(userId);
