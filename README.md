@@ -29,7 +29,7 @@ Ek olarak: aynı HTTP API'yi tüketen bir **React 19 + TypeScript** arayüzü.
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Docker (ya da lokal bir PostgreSQL sunucusu)
-- Node.js 20+ (yalnızca opsiyonel React arayüzü için)
+- Node.js **20.19+** veya **22.12+** (yalnızca opsiyonel React arayüzü için — Vite 8'in gereksinimi)
 
 ### 1. Veritabanını başlat
 
@@ -129,8 +129,9 @@ cd src/FeatureRequestPortal.SPA && npx tsc -b  # SPA tip kontrolü
 
 ### Ana sayfa — ziyaretçi
 
-Sayfalama (15 satır), oy sayısı kolonuna tıklanarak sıralama, durum filtresi.
-Ziyaretçi yalnızca `Approved` kayıtları görür; statü filtresi ona hiç gösterilmez.
+Ziyaretçi yalnızca `Approved` kayıtları görür. Statü filtresi ona hiç gösterilmiyor — göstersek
+her seçim boş tablo döndürürdü; yerine tek cümlelik bir açıklama var. Sayfalama 15 satır,
+oy sayısı kolonu başlığına tıklanarak sıralanabiliyor.
 
 ![Liste — ziyaretçi](docs/screenshots/01-list-anonymous.jpg)
 
@@ -142,7 +143,7 @@ Oy verme ve yorum yazma alanları giriş bağlantısına dönüşür.
 
 ### Ana sayfa — giriş yapmış kullanıcı
 
-Giriş yapan kullanıcı tüm statüleri görür ve filtreleyebilir.
+Giriş yapan kullanıcı tüm statüleri görür, filtreleyebilir ve sayfa boyutunu seçebilir.
 
 ![Liste — giriş yapmış](docs/screenshots/03-list-authenticated.jpg)
 
