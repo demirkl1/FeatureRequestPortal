@@ -28,6 +28,8 @@ Müşteriler talep açıyor, diğerleri oyluyor; en çok oy alan talepler hayata
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Docker (ya da lokal bir PostgreSQL sunucusu)
+- [ABP CLI](https://abp.io/docs/latest/cli) — istemci tarafı kütüphaneleri indirmek için:
+  `dotnet tool install -g Volo.Abp.Studio.Cli`
 
 ### 1. Veritabanını başlat
 
@@ -52,7 +54,20 @@ demo amaçlı **20 örnek talebi** ve bir normal kullanıcı hesabını yükler.
 > ⚠️ `DbMigrator` ve `Web` projeleri `appsettings.json` dosyasını **çalışma dizininden** okur.
 > Komutları repo kökünden değil, ilgili proje klasörünün içinden çalıştırın.
 
-### 3. Uygulamayı çalıştır
+### 3. İstemci kütüphanelerini indir
+
+```bash
+abp install-libs
+```
+
+Repo kökünden çalıştırın. `wwwroot/libs` klasörü (Bootstrap, jQuery, DataTables, LeptonX varlıkları)
+git'e dahil edilmez — bağımlılıklar `package.json` içinde tanımlıdır, bu komut onları indirip yerine
+kopyalar.
+
+> ⚠️ **Bu adımı atlarsanız uygulama açılırken HTTP 500 verir:**
+> *"The 'wwwroot/libs' folder does not exist or empty!"*
+
+### 4. Uygulamayı çalıştır
 
 ```bash
 cd src/FeatureRequestPortal.Web
@@ -72,7 +87,7 @@ dotnet run
 
 Swagger: <https://localhost:44372/swagger>
 
-### 4. (Opsiyonel) E-posta gönderimi
+### 5. (Opsiyonel) E-posta gönderimi
 
 Kayıt doğrulama kodu, hesap onay bildirimi ve şifre sıfırlama linki e-posta ile gider.
 

@@ -42,4 +42,8 @@
     <None Remove="Logs\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FeatureRequestPortal.Application\FeatureRequestPortal.Application.csproj" />
+  </ItemGroup>
+
 </Project>
